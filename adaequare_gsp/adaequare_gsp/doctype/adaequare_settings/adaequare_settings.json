@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "creation": "2021-09-28 17:26:53.017784",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "gspappid",
+  "column_break_1",
+  "gspappsecret",
+  "section_break",
+  "access_token",
+  "column_break_2",
+  "expires_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "gspappid",
+   "fieldtype": "Data",
+   "label": "GSP App ID"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gspappsecret",
+   "fieldtype": "Password",
+   "label": "GSP App Secret"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "label": "Expires At"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-10-06 09:40:18.419555",
+ "modified_by": "Administrator",
+ "module": "Adaequare Gsp",
+ "name": "Adaequare Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
