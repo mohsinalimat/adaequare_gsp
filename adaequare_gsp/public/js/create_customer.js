@@ -1,6 +1,5 @@
 
 frappe.provide("smc_erp")
-
 smc_erp.verify_gstin = function(dia){
 	console.log(dia)
 	var d = new frappe.ui.Dialog({
