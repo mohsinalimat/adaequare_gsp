@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include adaequare_gsp *.css
+recursive-include adaequare_gsp *.csv
+recursive-include adaequare_gsp *.html
+recursive-include adaequare_gsp *.ico
+recursive-include adaequare_gsp *.js
+recursive-include adaequare_gsp *.json
+recursive-include adaequare_gsp *.md
+recursive-include adaequare_gsp *.png
+recursive-include adaequare_gsp *.py
+recursive-include adaequare_gsp *.svg
+recursive-include adaequare_gsp *.txt
+recursive-exclude adaequare_gsp *.pyc
