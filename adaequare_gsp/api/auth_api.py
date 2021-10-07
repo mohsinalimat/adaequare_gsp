@@ -3,7 +3,7 @@ from frappe.utils import now, add_to_date
 from requests import api
 
 class AuthApi:
-    AUTH_URL = 'https://gsp.adaequare.com/gsp/authenticate?grant_type=token'
+    BASE_URL = 'https://gsp.adaequare.com/'
 
     def __init__(self):
         self.settings = frappe.get_doc('Adaequare Settings')
@@ -22,16 +22,20 @@ class AuthApi:
         return True
 
     def generate_access_token(self):
-        headers = {
-            "gspappid": self.gspappid,
-            "gspappsecret": self.gspappsecret
-        }
+        headers = {}
+        headers['gspappid'] = self.gspappid
+        headers['gspappsecret'] = self.gspappsecret
 
-        response = api.post(self.AUTH_URL , headers=headers).json()
+        params = {}
+        params['grant_type'] = 'token'
+
+        response = api.post('{}gsp/authenticate?'.format(self.BASE_URL), params=params, headers=headers).json()
+
         if response.get('error'):
             self.log_response(error=response, status="Failed")
             frappe.db.commit()
             frappe.throw(response.get("error_description"))
+
         self.settings.access_token = response.get("access_token")
         self.settings.expires_at = add_to_date(now(), seconds = response.get("expires_in"))
         self.settings.save(ignore_permissions=True, ignore_version=True)
@@ -46,7 +50,7 @@ class AuthApi:
             "reference_docname": docname,
             "data": json.dumps(data, indent=4) if isinstance(data, dict) else data,
             "output": json.dumps(response, indent=4) if response else None,
-            "error": error,
+            "error": json.dumps(error, indent=4) if error else None,
             "status": status
         })
         request_log.insert(ignore_permissions=True)
