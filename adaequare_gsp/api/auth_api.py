@@ -11,6 +11,7 @@ class AuthApi:
         self.settings = frappe.get_doc('Adaequare Settings')
         self.gspappid = self.settings.gspappid
         self.gspappsecret = self.settings.get_password('gspappsecret')
+        self.test_url = 'test/' if self.settings.sandbox else None
 
     def get_access_token(self):
         if not self.settings.access_token or self.access_token_invalid():

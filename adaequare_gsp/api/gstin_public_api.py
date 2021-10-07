@@ -3,12 +3,10 @@ from adaequare_gsp.api.auth_api import AuthApi
 from requests import api
 
 class GstPublicApi(AuthApi):
-    SANDBOX = True
     def __init__(self, gstin):
         super().__init__()
         self.access_token = self.get_access_token()
         self.gstin = gstin
-        self.test_url = 'test/' if self.SANDBOX else None
 
     def get_gstin_info(self):
         headers = {}

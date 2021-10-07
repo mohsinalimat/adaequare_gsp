@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "gspappid",
+  "sandbox",
   "column_break_1",
   "gspappsecret",
   "section_break_1",
@@ -68,12 +69,18 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-06 14:16:23.450191",
+ "modified": "2021-10-07 10:57:24.007459",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Adaequare Settings",
