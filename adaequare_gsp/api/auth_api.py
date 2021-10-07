@@ -1,7 +1,5 @@
-from os import access
 import frappe, json
 from frappe.utils import now, add_to_date
-from frappe.integrations.utils import make_get_request, make_post_request
 from requests import api
 
 class AuthApi:
