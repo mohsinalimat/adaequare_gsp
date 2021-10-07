@@ -12,6 +12,7 @@ class AuthApi:
         self.gspappid = self.settings.gspappid
         self.gspappsecret = self.settings.get_password('gspappsecret')
         self.test_url = 'test/' if self.settings.sandbox else ''
+        self.access_token = self.get_access_token()
 
     def get_access_token(self):
         if not self.settings.access_token or self.access_token_invalid():
@@ -66,6 +67,26 @@ class AuthApi:
                 '. Error Code: ' + error.get('errorCode') if error.get('errorCode') else ''
             )
             frappe.throw(error_des)
+
+    def get_request(self, action, gstin, fy='', url_suffix = ''):
+        headers = {}
+        headers['Authorization'] = self.access_token
+
+        params = {}
+        params['action'] = action
+        params['gstin'] = gstin
+        params['fy'] = fy
+
+        response = api.get('{}{}{}{}'.format(self.BASE_URL, self.test_url, self.api_name, url_suffix), 
+            params=params, headers=headers).json()
+
+        result = response.get('result')
+        if not result:
+            self.log_response(error=response)
+        
+        self.log_response(response)
+
+        return result 
 
     def generate_request_id(self):
         N = 12
