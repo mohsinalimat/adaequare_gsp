@@ -11,7 +11,7 @@ class AuthApi:
         self.settings = frappe.get_doc('Adaequare Settings')
         self.gspappid = self.settings.gspappid
         self.gspappsecret = self.settings.get_password('gspappsecret')
-        self.test_url = 'test/' if self.settings.sandbox else None
+        self.test_url = 'test/' if self.settings.sandbox else ''
 
     def get_access_token(self):
         if not self.settings.access_token or self.access_token_invalid():
@@ -34,8 +34,8 @@ class AuthApi:
 
         response = api.post('{}gsp/authenticate?'.format(self.BASE_URL), params=params, headers=headers).json()
 
-        if response.get('error'):
-            self.log_response(error=response, error_des=response.get('error_description'))
+        if not response.get('access_token'):
+            self.log_response(error=response)
 
         self.settings.access_token = response.get('token_type') + ' ' + response.get('access_token')
         self.settings.expires_at = add_to_date(now(), seconds = response.get('expires_in'))
@@ -43,7 +43,7 @@ class AuthApi:
         self.log_response(response)
 
     def log_response(self, response=None, data=None, doctype=None, docname=None, 
-        error=None, error_des=None):
+        error=None):
 
         request_log = frappe.get_doc({
             'doctype': 'Integration Request',
@@ -60,6 +60,11 @@ class AuthApi:
 
         if error:
             frappe.db.commit()
+            error_des = '{}{}{}'.format(
+                error.get('error_description', ''),
+                error.get('message', ''),
+                '. Error Code: ' + error.get('errorCode') if error.get('errorCode') else ''
+            )
             frappe.throw(error_des)
 
     def generate_request_id(self):
