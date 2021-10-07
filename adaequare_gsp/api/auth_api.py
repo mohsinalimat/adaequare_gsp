@@ -1,4 +1,6 @@
 import frappe, json
+import string, random
+
 from frappe.utils import now, add_to_date
 from requests import api
 
@@ -32,25 +34,35 @@ class AuthApi:
         response = api.post('{}gsp/authenticate?'.format(self.BASE_URL), params=params, headers=headers).json()
 
         if response.get('error'):
-            self.log_response(error=response, status="Failed")
-            frappe.db.commit()
-            frappe.throw(response.get("error_description"))
+            self.log_response(error=response, error_des=response.get('error_description'))
 
-        self.settings.access_token = response.get("access_token")
-        self.settings.expires_at = add_to_date(now(), seconds = response.get("expires_in"))
+        self.settings.access_token = response.get('token_type') + ' ' + response.get('access_token')
+        self.settings.expires_at = add_to_date(now(), seconds = response.get('expires_in'))
         self.settings.save(ignore_permissions=True, ignore_version=True)
         self.log_response(response)
 
-    def log_response(self, response=None, data=None, doctype=None, docname=None, error=None, status="Completed"):
+    def log_response(self, response=None, data=None, doctype=None, docname=None, 
+        error=None, error_des=None):
+
         request_log = frappe.get_doc({
-            "doctype": "Integration Request",
-            "integration_type": "Remote",
-            "integration_request_service": "Adaequare",
-            "reference_doctype": doctype,
-            "reference_docname": docname,
-            "data": json.dumps(data, indent=4) if isinstance(data, dict) else data,
-            "output": json.dumps(response, indent=4) if response else None,
-            "error": json.dumps(error, indent=4) if error else None,
-            "status": status
+            'doctype': 'Integration Request',
+            'integration_type': 'Remote',
+            'integration_request_service': 'Adaequare',
+            'reference_doctype': doctype,
+            'reference_docname': docname,
+            'data': json.dumps(data, indent=4) if isinstance(data, dict) else data,
+            'output': json.dumps(response, indent=4) if response else None,
+            'error': json.dumps(error, indent=4) if error else None,
+            'status': 'Failed' if error else 'Completed'
         })
         request_log.insert(ignore_permissions=True)
+
+        if error:
+            frappe.db.commit()
+            frappe.throw(error_des)
+
+    def generate_request_id(self):
+        N = 12
+        rand = ''.join(random.choices(string.ascii_uppercase +
+            string.digits, k = N))
+        return rand
