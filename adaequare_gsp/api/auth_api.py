@@ -68,7 +68,7 @@ class AuthApi:
             )
             frappe.throw(error_des)
 
-    def get_request(self, action, gstin, fy='', url_suffix = ''):
+    def make_request(self, method, action=None, gstin=None, ewbNo=None, fy='', url_suffix = '', data=''):
         headers = {}
         headers['Authorization'] = self.access_token
 
@@ -77,15 +77,28 @@ class AuthApi:
         params['gstin'] = gstin
         params['fy'] = fy
 
-        response = api.get('{}{}{}{}'.format(self.BASE_URL, self.test_url, self.api_name, url_suffix), 
-            params=params, headers=headers).json()
+        #additional headers and parms for ewayapi
+        if 'ewayapi' in url_suffix:
+            headers['requestid'] = self.generate_request_id()
+            headers['gstin'] = self.settings.gstin
+            headers['username'] = self.settings.username 
+            headers['password'] = self.settings.get_password('password')
+
+            params['ewbNo'] = ewbNo
+
+        #api calls
+        if method=='get':
+            response = api.get('{}{}{}{}'.format(self.BASE_URL, self.test_url, self.api_name, url_suffix), 
+                params=params, headers=headers).json()
+        elif method=='post':
+            response = api.post('{}{}{}{}'.format(self.BASE_URL, self.test_url, self.api_name, url_suffix), 
+                params=params, headers=headers, data=data).json()
 
         result = response.get('result')
         if not result:
             self.log_response(error=response)
         
         self.log_response(response)
-
         return result 
 
     def generate_request_id(self):

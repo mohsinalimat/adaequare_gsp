@@ -11,6 +11,7 @@
   "gspappsecret",
   "section_break_1",
   "username",
+  "gstin",
   "column_break_2",
   "password",
   "section_break_2",
@@ -75,12 +76,17 @@
    "fieldname": "sandbox",
    "fieldtype": "Check",
    "label": "Sandbox"
+  },
+  {
+   "fieldname": "gstin",
+   "fieldtype": "Data",
+   "label": "GSTIN"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-07 10:57:24.007459",
+ "modified": "2021-10-07 14:44:23.755978",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Adaequare Settings",
