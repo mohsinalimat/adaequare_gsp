@@ -1,7 +1,6 @@
+frappe.provide('adaequare_gsp');
 
-frappe.provide("smc_erp")
-smc_erp.verify_gstin = function(dia){
-	console.log(dia)
+adaequare_gsp.verify_gstin = function(dia){
 	var d = new frappe.ui.Dialog({
 		title: __('Verify GSTIN'),
 		fields: [
@@ -30,31 +29,50 @@ smc_erp.verify_gstin = function(dia){
 	d.show();
 }
 
-modifyMethod('frappe.ui.form.CustomerQuickEntryForm', 'get_variant_fields', function(old){
-	let variant_fields = old;
-	for (let i of variant_fields){
-		if(i.collapsible == 1){i.collapsible = 0};
-		if(i.fieldname == 'state'){i.default = 'Maharashtra'};
-		if(i.fieldname != 'country') {continue;}
-		i.hidden = 1;
-		i.default = 'India';
-		break;
-	}
+// modifyMethod('frappe.ui.form.CustomerQuickEntryForm', 'get_variant_fields', function(old){
+// 	let variant_fields = old;
+// 	for (let i of variant_fields){
+// 		if(i.collapsible == 1){i.collapsible = 0};
+// 		if(i.fieldname == 'state'){i.default = 'Maharashtra'};
+// 		if(i.fieldname != 'country') {continue;}
+// 		i.hidden = 1;
+// 		i.default = 'India';
+// 		break;
+// 	}
 
-	variant_fields.push(
+// 	variant_fields.push(
+// 		{
+// 			label: __("Locality"),
+// 			fieldname: "locality",
+// 			fieldtype: "Select"
+// 		},
+// 		{
+// 			label: __("Trial"),
+// 			fieldname: "trial",
+// 			fieldtype: "Button",
+// 			click: () => {
+// 				adaequare_gsp.verify_gstin(this);
+// 			}
+// 		}
+// 	)
+// 	return variant_fields;
+// })
+
+
+modifyMethod('frappe.ui.form.CustomerQuickEntryForm', 'render_dialog', function(old){
+	let gstin_fields = [
 		{
-			label: __("Locality"),
-			fieldname: "locality",
-			fieldtype: "Select"
+			"label" : "GSTIN12",
+			"fieldname": "gstin_12",
+			"fieldtype": "Data",
+			"reqd": 1
 		},
 		{
-			label: __("Trial"),
-			fieldname: "trial",
-			fieldtype: "Button",
-			click: () => {
-				smc_erp.verify_gstin(this);
-			}
+			"label" : "Full Name12",
+			"fieldname": "customer_name_12",
+			"fieldtype": "Data"
 		}
-	)
-	return variant_fields;
-})
+
+	]
+	this.mandatory = gstin_fields.concat(this.mandatory);
+}, true)
