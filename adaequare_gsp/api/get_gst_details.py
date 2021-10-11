@@ -1,6 +1,6 @@
-import frappe, requests
-from adaequare_gsp.api.gstin_public_api import GstPublicApi
-from requests.api import get
+import frappe
+from adaequare_gsp.api.gstn_public_api import GstnPublicApi
+from adaequare_gsp.api.gstn_ewb_api import GstnEwbApi
 
 @frappe.whitelist()
 def get_gstin_details():
@@ -8,5 +8,5 @@ def get_gstin_details():
     return gsp_authentication
 
 def get_gsp_authentication():
-    api = GstPublicApi()
-    return api.access_token
+    api = GstnEwbApi()
+    return api.cancel_eway_bill(cancel)
