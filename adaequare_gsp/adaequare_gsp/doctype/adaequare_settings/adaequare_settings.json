@@ -14,6 +14,10 @@
   "gstin",
   "column_break_2",
   "password",
+  "section_break_3",
+  "gstn_public_api",
+  "column_break_4",
+  "gstn_ewb_api",
   "section_break_2",
   "access_token",
   "column_break_3",
@@ -81,12 +85,32 @@
    "fieldname": "gstin",
    "fieldtype": "Data",
    "label": "GSTIN"
+  },
+  {
+   "default": "0",
+   "fieldname": "gstn_public_api",
+   "fieldtype": "Check",
+   "label": "Enable GSTN Public API"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "gstn_ewb_api",
+   "fieldtype": "Check",
+   "label": "Enable GSTN Eway Bill API"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-07 14:44:23.755978",
+ "modified": "2021-10-11 17:40:52.095458",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Adaequare Settings",

@@ -1,4 +1,4 @@
-from adaequare_gsp.api.auth_api import AuthApi
+from adaequare_gsp.helpers.auth_api import AuthApi
 
 class GstnPublicApi(AuthApi):
     def __init__(self):

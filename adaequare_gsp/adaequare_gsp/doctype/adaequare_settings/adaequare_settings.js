@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Adaequare Settings', {
-	// refresh: function(frm) {
-
-	// }
+	validate: function(frm) {
+		frm.doc.expires_at = date.nowdate() + ' ' + date.now_time() + '.0';
+	}
 });
