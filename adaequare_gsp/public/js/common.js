@@ -58,7 +58,13 @@ adaequare_gsp.map_gstin_details = (dia) => {
 
 adaequare_gsp.update_customer_info = function (dia) {
 	dia.doc.gstin = dia.doc.gstin.toUpperCase();
-	dia.doc.customer_name = adaequare_gsp.title_case(adaequare_gsp.gstin_info.tradeNam);
+    let customer_name
+    if(adaequare_gsp.gstin_info.ctb == 'Proprietorship'){
+        customer_name = adaequare_gsp.gstin_info.tradeNam
+    }else{
+        customer_name = adaequare_gsp.gstin_info.lgnm
+    }
+	dia.doc.customer_name = adaequare_gsp.title_case(customer_name);
 }
 
 adaequare_gsp.update_address_info = function (dia, address) {
