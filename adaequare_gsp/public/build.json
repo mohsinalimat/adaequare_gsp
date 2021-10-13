@@ -1,6 +1,7 @@
 {
     "js/adaequare_gsp.min.js": [
       "public/js/utils.js",
+      "public/js/common.js",
       "public/js/create_customer.js"
     ]
 }
