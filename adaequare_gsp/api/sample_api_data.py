@@ -1,7 +1,6 @@
 data_eway_gen = {
     "supplyType":"O",
     "subSupplyType":"1",
-    
     "docType":"INV",
     "docNo":"123-853426dd",
     "docDate":"15/12/2017",
@@ -51,7 +50,7 @@ data_eway_gen = {
     }
     ]}
 
-    update_vehicle = {
+update_vehicle = {
   "EwbNo": 381002748764,
   "VehicleNo": "PQR9876",
   "FromPlace": "BANGALORE",
@@ -59,9 +58,9 @@ data_eway_gen = {
  "ReasonCode": "1",
   "ReasonRem": "vehicle broke down",
    "TransMode": "1"
-    }
+}
 
-    extend_validity = {
+extend_validity = {
 "ewbNo": 381002748764,
 "vehicleNo": "HR04EL1234",
 "fromPlace":"Bengaluru",
@@ -76,13 +75,14 @@ data_eway_gen = {
 "transMode": "1",
 "extnRsnCode":1,
 "extnRemarks":"Flood"
-}   
-    update_transporter = {
+}
+
+update_transporter = {
 "ewbNo":"321002748737",
 "transporterId":"29AKLPM8755F1Z2"
 }
 
-    cancel = {  
+cancel = {
 "ewbNo": "331002748800",
  "cancelRsnCode": 2
 }
