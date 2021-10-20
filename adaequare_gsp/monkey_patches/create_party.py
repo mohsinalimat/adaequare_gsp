@@ -63,6 +63,6 @@ def validate (self, method=None):
         self.gstin_info = json.dumps(self.get('gstin_info'))
     
     if self.get('gstin') and (self.get('gstin') != 'URP' or self.get('gstin') != 'NA'):
-        pan = self.get('gstin')[2:13]
+        pan = self.get('gstin')[2:12]
         if PAN_NUMBER_FORMAT.match(pan):
             self.pan = pan
