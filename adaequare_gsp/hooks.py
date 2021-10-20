@@ -57,7 +57,7 @@ app_include_js = "/assets/js/adaequare_gsp.min.js"
 # ------------
 
 # before_install = "adaequare_gsp.install.before_install"
-# after_install = "adaequare_gsp.install.after_install"
+after_install = "adaequare_gsp.install.after_install"
 
 # Desk Notifications
 # ------------------
@@ -89,13 +89,14 @@ app_include_js = "/assets/js/adaequare_gsp.min.js"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Customer": {
+		"validate": "adaequare_gsp.monkey_patches.create_party.validate"
+	},
+	"Supplier": {
+		"validate": "adaequare_gsp.monkey_patches.create_party.validate"
+	}
+}
 
 # Scheduled Tasks
 # ---------------

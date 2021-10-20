@@ -9,7 +9,6 @@ adaequare_gsp.autofill_gstin_fields = function (dia) {
 		method: "adaequare_gsp.api.validate_gstin.validate_gstin",
 		args: { gstin: gstin },
 		callback: function (r) {
-			console.log(r);
 			if (!r.message) {
 				frappe.msgprint('Please enter Valid GSTIN', 'Invalid GSTIN');
 				return;
@@ -30,7 +29,6 @@ adaequare_gsp.get_gstin_details = function (dia, gstin) {
 			callback: function (r) {
 				adaequare_gsp.gstin_info = r.message;
 				dia.doc.api_called_for = gstin;
-				console.log(adaequare_gsp.gstin_info);
 				// Assign fields
 				adaequare_gsp.map_gstin_details(dia);
 			}
@@ -41,15 +39,21 @@ adaequare_gsp.get_gstin_details = function (dia, gstin) {
 
 adaequare_gsp.map_gstin_details = function (dia) {
 	let gi = adaequare_gsp.gstin_info;
+	if(!gi.pradr){
+		adaequare_gsp.update_party_info(dia);
+		dia.refresh();	
+		return;
+	}
 	gi.all_address = [];
 	gi.all_address.push(gi.pradr.addr);
-	for (let addr of gi.adadr) {
-		gi.all_address.push(addr.addr);
+	if(gi.adadr){
+		for (let addr of gi.adadr) {
+			gi.all_address.push(addr.addr);
+		}
 	}
 	let address = adaequare_gsp.get_address(gi.all_address[0]);
-	adaequare_gsp.update_customer_info(dia);
+	adaequare_gsp.update_party_info(dia);
 	adaequare_gsp.update_address_info(dia, address);
-	console.log(gi.all_address);
 	dia.refresh();
 
 	const field = dia.fields_dict.pincode;
@@ -86,15 +90,17 @@ adaequare_gsp.map_gstin_details = function (dia) {
 		});
 };
 
-adaequare_gsp.update_customer_info = function (dia) {
+adaequare_gsp.update_party_info = function (dia) {
 	dia.doc.gstin = dia.doc.gstin.toUpperCase();
-	let customer_name;
+	let party_name;
 	if (adaequare_gsp.gstin_info.ctb == 'Proprietorship') {
-		customer_name = adaequare_gsp.gstin_info.tradeNam;
+		party_name = adaequare_gsp.gstin_info.tradeNam;
 	} else {
-		customer_name = adaequare_gsp.gstin_info.lgnm;
+		party_name = adaequare_gsp.gstin_info.lgnm;
 	}
-	dia.doc.customer_name = toTitleCase(customer_name);
+	dia.doc.customer_name = toTitleCase(party_name);
+	dia.doc.supplier_name = toTitleCase(party_name);
+	dia.doc.gstin_info = JSON.stringify(adaequare_gsp.gstin_info);
 };
 
 adaequare_gsp.update_address_info = function (dia, address) {
@@ -124,11 +130,9 @@ adaequare_gsp.get_address = function (addr) {
 };
 
 adaequare_gsp.autofill_address = function (dia) {
-	if (dia.doc.pincode.length != 6) return;
+	if (dia.doc.pincode.length != 6 || !adaequare_gsp.gstin_info.all_address) return;
 	for (let addr of adaequare_gsp.gstin_info.all_address) {
 		if (addr.pncd != dia.doc.pincode) continue;
-		console.log(addr);
-		console.log(adaequare_gsp.get_address(addr));
 		adaequare_gsp.update_address_info(dia, adaequare_gsp.get_address(addr));
 		dia.refresh();
 		break;
@@ -154,15 +158,23 @@ adaequare_gsp.split_address = function (s) {
 
 
 adaequare_gsp.get_gstin_fields = function (dia) {
-	let gstin_fields = [{
-		label: "GSTIN",
-		fieldname: "gstin",
-		fieldtype: "Data",
-		description: "Autofill customer information by entering correct GSTIN.",
-		onchange() {
-			adaequare_gsp.autofill_gstin_fields(dia.dialog);
+	let gstin_fields = [
+		{
+			label: "GSTIN",
+			fieldname: "gstin",
+			fieldtype: "Data",
+			description: "Autofill party information by entering correct GSTIN.",
+			onchange() {
+				adaequare_gsp.autofill_gstin_fields(dia.dialog);
+			}
+		},
+		{
+			label: "GSTIN Info",
+			fieldname: "gstin_info",
+			fieldtype: "Code",
+			hidden: 1
 		}
-	}];
+	];
 	return gstin_fields;
 };
 
