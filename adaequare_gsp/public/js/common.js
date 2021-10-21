@@ -56,38 +56,17 @@ adaequare_gsp.map_gstin_details = function (dia) {
 	adaequare_gsp.update_address_info(dia, address);
 	dia.refresh();
 
-	const field = dia.fields_dict.pincode;
-	$(field.input_area).addClass("ui-front");
+	adaequare_gsp.pincode_awesomplete(dia);
+};
 
-	var input = field.$input.get(0);
-	input.awesomplete = new Awesomplete(input, {
-		minChars: 0,
-		maxItems: 99,
-		autoFirst: true,
-		list: [],
-	});
-	input.field = field;
-
-	field.$input
-		.on('input', function (e) {
-			var term = e.target.value;
-			e.target.awesomplete.list = gi.all_address.map(a => a.pncd);
-		})
-		.on('focus', function (e) {
-			// $(e.target).val('').trigger('input');
-		})
-		.on("awesomplete-open", () => {
-			let modal = field.$input.parents('.modal-dialog')[0];
-			if (modal) {
-				$(modal).removeClass("modal-dialog-scrollable");
-			}
-		})
-		.on("awesomplete-close", () => {
-			let modal = field.$input.parents('.modal-dialog')[0];
-			if (modal) {
-				$(modal).addClass("modal-dialog-scrollable");
-			}
-		});
+adaequare_gsp.autofill_address = function (dia) {
+	if (dia.doc.pincode.length != 6 || !adaequare_gsp.gstin_info.all_address) return;
+	for (let addr of adaequare_gsp.gstin_info.all_address) {
+		if (addr.pncd != dia.doc.pincode) continue;
+		adaequare_gsp.update_address_info(dia, adaequare_gsp.get_address(addr));
+		dia.refresh();
+		break;
+	}
 };
 
 adaequare_gsp.update_party_info = function (dia) {
@@ -129,16 +108,6 @@ adaequare_gsp.get_address = function (addr) {
 	return address;
 };
 
-adaequare_gsp.autofill_address = function (dia) {
-	if (dia.doc.pincode.length != 6 || !adaequare_gsp.gstin_info.all_address) return;
-	for (let addr of adaequare_gsp.gstin_info.all_address) {
-		if (addr.pncd != dia.doc.pincode) continue;
-		adaequare_gsp.update_address_info(dia, adaequare_gsp.get_address(addr));
-		dia.refresh();
-		break;
-	}
-};
-
 adaequare_gsp.split_address = function (s) {
 	let middle = Math.floor(s.length / 2);
 	let before = s.lastIndexOf(',', middle);
@@ -156,6 +125,39 @@ adaequare_gsp.split_address = function (s) {
 	return { address_line1, address_line2 };
 };
 
+adaequare_gsp.pincode_awesomplete = function (dia) {
+	const field = dia.fields_dict.pincode;
+	$(field.input_area).addClass("ui-front");
+
+	var input = field.$input.get(0);
+	input.awesomplete = new Awesomplete(input, {
+		minChars: 0,
+		maxItems: 99,
+		autoFirst: true,
+		list: [],
+	});
+	input.field = field;
+
+	field.$input
+		.on('input', function (e) {
+			e.target.awesomplete.list = adaequare_gsp.gstin_info.all_address.map(a => a.pncd);
+		})
+		.on('focus', function () {
+			// $(e.target).val('').trigger('input');
+		})
+		.on("awesomplete-open", () => {
+			let modal = field.$input.parents('.modal-dialog')[0];
+			if (modal) {
+				$(modal).removeClass("modal-dialog-scrollable");
+			}
+		})
+		.on("awesomplete-close", () => {
+			let modal = field.$input.parents('.modal-dialog')[0];
+			if (modal) {
+				$(modal).addClass("modal-dialog-scrollable");
+			}
+		});
+}
 
 adaequare_gsp.get_gstin_fields = function (dia) {
 	let gstin_fields = [
@@ -177,7 +179,6 @@ adaequare_gsp.get_gstin_fields = function (dia) {
 	];
 	return gstin_fields;
 };
-
 
 adaequare_gsp.get_variant_fields = function (dia) {
 	let variant_fields = [{
@@ -251,7 +252,6 @@ adaequare_gsp.get_variant_fields = function (dia) {
 	}];
 	return variant_fields;
 };
-
 
 function toTitleCase(text) {
 	text = text.toLowerCase().split(' ');
