@@ -31,7 +31,7 @@ app_include_js = "/assets/js/adaequare_gsp.min.js"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Address" : "scripts/address.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -91,10 +91,13 @@ after_install = "adaequare_gsp.install.after_install"
 
 doc_events = {
 	"Customer": {
-		"validate": "adaequare_gsp.monkey_patches.create_party.validate"
+		"validate": "adaequare_gsp.monkey_patches.create_party.validate_party"
 	},
 	"Supplier": {
-		"validate": "adaequare_gsp.monkey_patches.create_party.validate"
+		"validate": "adaequare_gsp.monkey_patches.create_party.validate_party"
+	},
+	"Address": {
+		"validate": "adaequare_gsp.monkey_patches.create_party.validate_address"
 	}
 }
 
