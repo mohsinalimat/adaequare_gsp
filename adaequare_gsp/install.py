@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def after_install():
@@ -11,23 +12,41 @@ def make_custom_fields():
 gstin_fields = [
     {
         'fieldname': 'section_gstin_info',
-        'label': 'GSTIN Information',
+        'label': _('GSTIN Information'),
         'fieldtype': 'Section Break',
         'insert_after': 'is_frozen',
     },
     {
         'fieldname': 'gstin_info_updated_on',
-        'label': 'Updated On',
+        'label': _('Updated On'),
         'fieldtype': 'Datetime',
         'insert_after': 'section_gstin_info',
-        'read_only': 1
+        'read_only': 1,
+        'translatable': 0
+    },
+    {
+        'fieldname': 'default_gstin',
+        'label': _('GSTIN'),
+        'fieldtype': 'Data',
+        'insert_after': 'gstin_info_updated_on',
+        'read_only': 1,
+        'translatable': 0
+    },
+    {
+        'fieldname': 'trade_name',
+        'label': _('Trade Name'),
+        'fieldtype': 'Data',
+        'insert_after': 'default_gstin',
+        'read_only': 1,
+        'translatable': 0
     },
     {
         'fieldname': 'gstin_info',
-        'label': 'GSTIN Info',
+        'label': _('GSTIN Info'),
         'fieldtype': 'Code',
-        'insert_after': 'gstin_info_updated_on',
-        'hidden': 1
+        'insert_after': 'trade_name',
+        'hidden': 1,
+        'translatable': 0
     },
     {
         'fieldname': 'cb_gstin_info',
@@ -36,17 +55,19 @@ gstin_fields = [
     },
     {
         'fieldname': 'ctb',
-        'label': 'Constitution of Business',
+        'label': _('Constitution of Business'),
         'fieldtype': 'Data',
         'insert_after': 'cb_gstin_info',
-        'read_only': 1
+        'read_only': 1,
+        'translatable': 0
     },
     {
         'fieldname': 'sts',
-        'label': 'Status of GSTIN',
+        'label': _('Status of GSTIN'),
         'fieldtype': 'Data',
         'insert_after': 'ctb',
-        'read_only': 1
+        'read_only': 1,
+        'translatable': 0
     },
 ]
 

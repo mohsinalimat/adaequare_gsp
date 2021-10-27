@@ -61,6 +61,8 @@ def validate_party(self, method=None):
         self.gstin_info_updated_on = now_datetime()
         self.ctb = self.gstin_info.get("ctb")
         self.sts = self.gstin_info.get("sts")
+        self.default_gstin = self.gstin_info.get("gstin")
+        self.trade_name = self.gstin_info.get("tradeNam")
         self.gstin_info = json.dumps(self.get("gstin_info"))
 
     if self.get("gstin_custom") and (
