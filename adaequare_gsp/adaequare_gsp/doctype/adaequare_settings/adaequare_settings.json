@@ -18,6 +18,10 @@
   "gstn_public_api",
   "column_break_4",
   "gstn_ewb_api",
+  "section_break_4",
+  "update_party_info",
+  "column_break_16",
+  "mark_unregistered",
   "section_break_2",
   "access_token",
   "column_break_3",
@@ -69,7 +73,8 @@
   },
   {
    "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "column_break_3",
@@ -105,12 +110,35 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: doc.gstn_public_api",
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Bulk Update"
+  },
+  {
+   "description": "This will update all GST related information including PAN for all parties. This will not update address or party names.",
+   "fieldname": "update_party_info",
+   "fieldtype": "Button",
+   "label": "Update Party Info"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "This will mark all address without GSTIN as URP and set GST Category as Unregistered.",
+   "fieldname": "mark_unregistered",
+   "fieldtype": "Check",
+   "label": "Mark address without GSTIN as Unregistered"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-11 17:40:52.095458",
+ "modified": "2021-10-28 07:46:36.399566",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Adaequare Settings",
