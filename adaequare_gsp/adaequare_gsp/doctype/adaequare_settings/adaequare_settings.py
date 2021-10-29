@@ -14,28 +14,24 @@ class AdaequareSettings(Document):
 
 @frappe.whitelist()
 def enqueue_bulk_update_party(make_urp):
-	frappe.msgprint('Verify customers and suppliers after some time.', title='Bulk Update started')
-	frappe.enqueue(bulk_update_party, make_urp=make_urp)
-
-def bulk_update_party(make_urp):
 	doctypes = ['Customer', 'Supplier']
 	make_urp = int(make_urp)
+	frappe.msgprint('Verify customers and suppliers after some time.', title='Bulk Update started')
 	for dt in doctypes:
-		if dt == "Supplier":
-			parties = frappe.db.get_all(dt, fields=['name', 'default_gstin', 'pan', 'is_transporter'])
-		else:
-			parties = frappe.db.get_all(dt, fields=['name', 'default_gstin', 'pan'])
-		
-		for p in parties:
-			address = get_party_address(dt, p.name)
-			if address:
-				try:
-					default_gstin = get_default_gstin(p, address)					
-					update_party_and_address(dt, p, address, default_gstin, make_urp)
-				except Exception as e:
-					frappe.log_error('Could not update {} with name {}.\nTraceback:\n{}'.format(dt, p.name, e),
-						title='Error while bulk update from Adaequare Settings')
-					continue
+		parties = get_parties(dt)
+		frappe.enqueue(update_party_gstin_details, make_urp=make_urp, dt=dt, parties=parties)
+
+def update_party_gstin_details(make_urp, dt, parties):
+	for p in parties:
+		address = get_party_address(dt, p.name)
+		if address:
+			try:
+				default_gstin = get_default_gstin(p, address)					
+				update_party_and_address(dt, p, address, default_gstin, make_urp)
+			except Exception as e:
+				frappe.log_error('Could not update {} with name {}.\nTraceback:\n{}'.format(dt, p.name, e),
+					title='Error while bulk update from Adaequare Settings')
+				continue
 
 def update_party_and_address(doctype, party, address, default_gstin, make_urp):
 	gstin_list = []
@@ -53,7 +49,6 @@ def update_party_and_address(doctype, party, address, default_gstin, make_urp):
 			gstin_info = api.get_gstin_info(gstin)
 
 		update_address(address, gstin, gstin_info)
-
 		if gstin == default_gstin:
 			update_party(doctype, party, gstin_info)
 
@@ -62,15 +57,9 @@ def update_party(doctype, party, gstin_info):
 	if not pan and gstin_info.get("gstin") and len(gstin_info.get("gstin")) == 15:
 		pan = gstin_info.get("gstin")[2:12]
 
-	if gstin_info.get("ctb") in ["Public Limited Company", "Private Limited Company", "Unlimited Company"]:
-		party_type = "Company"
-	else:
-		party_type = "Individual"
-
-	if doctype == "Supplier":
-		pt = "supplier_type"
-	else:
-		pt = "customer_type"
+	company_list = ["Public Limited Company", "Private Limited Company", "Unlimited Company"]
+	party_type = "Company" if gstin_info.get("ctb") in company_list else "Individual"
+	pt = "supplier_type" if doctype == "Supplier" else "customer_type"
 				
 	frappe.db.set_value(doctype, party.name, {
 		'pan': pan,
@@ -93,6 +82,7 @@ def update_address(address, gstin, gstin_info):
 		gst_category = gst_category_map[gstin_info.get("dty")]
 		if gst_category == "Unregistered" and addr.country != "India":
 			gst_category = "Overseas"
+		
 		frappe.db.set_value('Address', addr.name, {
 			'gst_category': gst_category,
 			'gstin': gstin_info.get("gstin")
@@ -116,10 +106,17 @@ def get_default_gstin(p, address):
 	if p.pan:
 		if p.default_gstin:
 			default_gstin = p.default_gstin if p.default_gstin[2:12] == p.pan else None
-		else:
+		if not p.default_gstin or not default_gstin:
 			for addr in address:
 				default_gstin = addr.gstin if addr.gstin[2:12] == p.pan else None
 				if default_gstin: break
 	else:
 		default_gstin = address[0].gstin
 	return default_gstin
+
+def get_parties(dt, filters=None):
+	if dt == "Supplier":
+		parties = frappe.db.get_all(dt, fields=['name', 'default_gstin', 'pan', 'is_transporter'], filters=filters)
+	else:
+		parties = frappe.db.get_all(dt, fields=['name', 'default_gstin', 'pan'], filters=filters)
+	return parties
