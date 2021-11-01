@@ -71,10 +71,11 @@ def update_party(doctype, party, gstin_info):
 		'gstin_info': json.dumps(gstin_info),
 		pt: party_type 
 	})
-	if party.get("is_transporter"):
-		frappe.db.set_value(doctype, party.name, {
-			'gst_transporter_id': gstin_info.get("gstin"),
-		})
+	# not currently supported for e-Waybill
+	# if party.get("is_transporter"):
+	# 	frappe.db.set_value(doctype, party.name, {
+	# 		'gst_transporter_id': gstin_info.get("gstin"),
+	# 	})
 
 def update_address(address, gstin, gstin_info):
 	for addr in address:
