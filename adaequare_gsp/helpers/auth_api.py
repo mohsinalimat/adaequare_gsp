@@ -1,8 +1,10 @@
-import frappe, json
-import string, random
-
-from frappe.utils import now, add_to_date
+import json
+import random
 from requests import api
+import string
+
+import frappe
+from frappe.utils import now, add_to_date
 
 
 class AuthApi:
@@ -10,10 +12,8 @@ class AuthApi:
 
     def __init__(self):
         self.settings = frappe.get_doc("Adaequare Settings")
-        self.gspappid = self.settings.gspappid
-        self.gspappsecret = self.settings.get_password("gspappsecret")
         self.test_url = "test/" if self.settings.sandbox else ""
-        self.access_token = self.get_access_token()
+        self.get_access_token()
 
     def get_access_token(self):
         if not self.settings.access_token or not self.is_valid_access_token():
@@ -24,22 +24,20 @@ class AuthApi:
         return self.settings.expires_at and now() < self.settings.expires_at
 
     def generate_access_token(self):
-        headers = {}
-        headers["gspappid"] = self.gspappid
-        headers["gspappsecret"] = self.gspappsecret
-
-        params = {}
-        params["grant_type"] = "token"
-
         response = api.post(
-            "{}gsp/authenticate?".format(self.BASE_URL), params=params, headers=headers
+            f"{self.BASE_URL}gsp/authenticate",
+            params={"grant_type": "token"},
+            headers={
+                "gspappid": self.settings.gspappid,
+                "gspappsecret": self.settings.get_password("gspappsecret"),
+            },
         ).json()
 
-        if not response.get("access_token"):
-            self.log_response(error=response)
+        if not response.get("access_token") or not response.get("token_type"):
+            return self.log_response(error=response)
 
         self.settings.access_token = (
-            response.get("token_type") + " " + response.get("access_token")
+            response["token_type"] + " " + response["access_token"]
         )
         self.settings.expires_at = add_to_date(
             now(), seconds=response.get("expires_in")
@@ -50,7 +48,6 @@ class AuthApi:
     def log_response(
         self, response=None, data=None, doctype=None, docname=None, error=None
     ):
-
         request_log = frappe.get_doc(
             {
                 "doctype": "Integration Request",
@@ -83,7 +80,7 @@ class AuthApi:
         if method not in ("get", "post"):
             frappe.throw("Invalid method", upper(method))
 
-        headers = {"Authorization": self.access_token}
+        headers = {"Authorization": self.settings.access_token}
 
         params = {
             "action": action,
@@ -112,7 +109,16 @@ class AuthApi:
             response = api.post(url, params=params, headers=headers, data=data).json()
 
         result = response.get("result")
-        self.log_response(**{("response" if result else "error"): response})
+        self.log_response(
+            **{
+                ("response" if result else "error"): response,
+                "data": {
+                    "headers": headers,
+                    "body": data or "",
+                    "params": params,
+                },
+            }
+        )
         return result
 
     def generate_request_id(self, length=12):
