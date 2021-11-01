@@ -27,7 +27,7 @@ adaequare_gsp.get_gstin_details = function (dia, gstin) {
         },
         "",
         function (d) {
-            if (!d.gstn_public_api) return;
+            if (d.gstn_public_api == 0) return;
             frappe.call({
                 method: "adaequare_gsp.api.get_gstin_details.get_gstin_details",
                 args: { gstin: gstin },

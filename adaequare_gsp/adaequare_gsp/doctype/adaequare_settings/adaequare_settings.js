@@ -6,6 +6,7 @@ frappe.ui.form.on('Adaequare Settings', {
 		frm.doc.expires_at = date.nowdate() + ' ' + date.now_time() + '.0';
 	},
 	update_party_info: function (frm) {
+		if(frm.doc.gstn_pubilc_api == 0)return;
 		frappe.confirm('Are you sure you want to proceed?',
     () => {
         frappe.call({
