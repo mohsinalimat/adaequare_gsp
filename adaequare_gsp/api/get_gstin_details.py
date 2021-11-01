@@ -4,6 +4,11 @@ from adaequare_gsp.adaequare_gsp.doctype.adaequare_settings.adaequare_settings i
     update_party_gstin_details,
     get_parties
 )
+from erpnext.regional.india.utils import (
+    GSTIN_FORMAT,
+    GSTIN_UIN_FORMAT,
+    validate_gstin_check_digit,
+)
 
 
 @frappe.whitelist()
@@ -47,4 +52,12 @@ def get_party_gstin(customer=None, supplier=None):
 def update_party(dt, dn):
     parties = get_parties(dt, {'name': dn}) if dt == 'Customer' else get_parties(dt, {'name': dn})
     update_party_gstin_details(1, dt, parties)
+    return True
+
+@frappe.whitelist()
+def validate_gstin(gstin):
+    if not GSTIN_FORMAT.match(gstin) and not GSTIN_UIN_FORMAT.match(gstin):
+        return
+
+    validate_gstin_check_digit(gstin)
     return True

@@ -7,7 +7,7 @@ adaequare_gsp.autofill_gstin_fields = function (dia) {
     if (!gstin || gstin.length != 15 || dia.doc.api_called_for == gstin) return;
     gstin = gstin.toUpperCase();
     frappe.call({
-        method: "adaequare_gsp.api.validate_gstin.validate_gstin",
+        method: "adaequare_gsp.api.get_gstin_details.validate_gstin",
         args: { gstin: gstin },
         callback: function (r) {
             if (!r.message) {
