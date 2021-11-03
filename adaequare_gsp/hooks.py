@@ -3,7 +3,7 @@ from . import __version__ as app_version
 app_name = "adaequare_gsp"
 app_title = "Adaequare Gsp"
 app_publisher = "Resilient Tech"
-app_description = "API\'s for India GST, integration with ERPNext"
+app_description = "API's for India GST, integration with ERPNext"
 app_icon = "octicon octicon-file-directory"
 app_color = "grey"
 app_email = "sagar@resilient.tech"
@@ -31,7 +31,7 @@ app_include_js = "/assets/js/adaequare_gsp.min.js"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Address" : "scripts/address.js"}
+doctype_js = {"Address": "scripts/address.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -44,7 +44,7 @@ doctype_js = {"Address" : "scripts/address.js"}
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -90,15 +90,18 @@ after_install = "adaequare_gsp.install.after_install"
 # Hook on document methods and events
 
 doc_events = {
-	"Customer": {
-		"validate": "adaequare_gsp.monkey_patches.create_party.validate_party"
-	},
-	"Supplier": {
-		"validate": "adaequare_gsp.monkey_patches.create_party.validate_party"
-	},
-	"Address": {
-		"validate": "adaequare_gsp.monkey_patches.create_party.validate_address"
-	}
+    "Customer": {
+        "validate": "adaequare_gsp.monkey_patches.create_party.validate_party"
+    },
+    "Supplier": {
+        "validate": "adaequare_gsp.monkey_patches.create_party.validate_party"
+    },
+    "Address": {
+        "validate": "adaequare_gsp.monkey_patches.create_party.validate_address"
+    },
+    "Sales Invoice": {
+        "validate": "adaequare_gsp.api.ewaybill.validate_invoice_for_ewaybill"
+    },
 }
 
 # Scheduled Tasks
@@ -150,24 +153,22 @@ doc_events = {
 # --------------------
 
 user_data_fields = [
-	{
-		"doctype": "{doctype_1}",
-		"filter_by": "{filter_by}",
-		"redact_fields": ["{field_1}", "{field_2}"],
-		"partial": 1,
-	},
-	{
-		"doctype": "{doctype_2}",
-		"filter_by": "{filter_by}",
-		"partial": 1,
-	},
-	{
-		"doctype": "{doctype_3}",
-		"strict": False,
-	},
-	{
-		"doctype": "{doctype_4}"
-	}
+    {
+        "doctype": "{doctype_1}",
+        "filter_by": "{filter_by}",
+        "redact_fields": ["{field_1}", "{field_2}"],
+        "partial": 1,
+    },
+    {
+        "doctype": "{doctype_2}",
+        "filter_by": "{filter_by}",
+        "partial": 1,
+    },
+    {
+        "doctype": "{doctype_3}",
+        "strict": False,
+    },
+    {"doctype": "{doctype_4}"},
 ]
 
 # Authentication and authorization
@@ -176,4 +177,3 @@ user_data_fields = [
 # auth_hooks = [
 # 	"adaequare_gsp.auth.validate"
 # ]
-

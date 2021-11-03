@@ -1,0 +1,231 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:ewaybill",
+ "creation": "2021-11-02 07:19:19.222097",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ewaybill",
+  "ewaybill_date",
+  "valid_upto",
+  "linked_with",
+  "column_break1",
+  "result",
+  "section_break1",
+  "is_cancelled",
+  "cancel_reason_code",
+  "cancel_remark",
+  "cancel_date",
+  "column_break_2",
+  "cancel_result",
+  "section_break_14",
+  "gst_transporter_id",
+  "trans_update_date",
+  "column_break_3",
+  "trans_result",
+  "section_break_19",
+  "vech_date",
+  "vehicle_no",
+  "from_place",
+  "from_state",
+  "vech_reason",
+  "vech_remark",
+  "column_break_4",
+  "lr_no",
+  "lr_date",
+  "vech_result"
+ ],
+ "fields": [
+  {
+   "fieldname": "ewaybill",
+   "fieldtype": "Data",
+   "label": "Ewaybill",
+   "unique": 1
+  },
+  {
+   "fieldname": "ewaybill_date",
+   "fieldtype": "Datetime",
+   "label": "Date"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Datetime",
+   "label": "Valid Upto"
+  },
+  {
+   "fieldname": "linked_with",
+   "fieldtype": "Data",
+   "label": "Linked With"
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Code",
+   "label": "Result",
+   "options": "JSON"
+  },
+  {
+   "depends_on": "eval: doc.is_cancelled == 1",
+   "fieldname": "section_break1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "cancel_reason_code",
+   "fieldtype": "Data",
+   "label": "Cancel Reason Code"
+  },
+  {
+   "fieldname": "cancel_remark",
+   "fieldtype": "Data",
+   "label": "Cancel Remark"
+  },
+  {
+   "fieldname": "cancel_result",
+   "fieldtype": "Code",
+   "label": "Cancel Result",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cancel_date",
+   "fieldtype": "Datetime",
+   "label": "Cancel Date"
+  },
+  {
+   "depends_on": "eval: doc.trans_update_date",
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gst_transporter_id",
+   "fieldtype": "Data",
+   "label": "GST Transporter ID"
+  },
+  {
+   "fieldname": "trans_update_date",
+   "fieldtype": "Datetime",
+   "label": "Update Date"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trans_result",
+   "fieldtype": "Code",
+   "label": "Transporter ID Update Result",
+   "options": "JSON"
+  },
+  {
+   "depends_on": "eval: doc.vech_date",
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "vech_date",
+   "fieldtype": "Datetime",
+   "label": "Vehicle Update Date"
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle No"
+  },
+  {
+   "fieldname": "from_place",
+   "fieldtype": "Data",
+   "label": "From Place"
+  },
+  {
+   "fieldname": "from_state",
+   "fieldtype": "Data",
+   "label": "From State"
+  },
+  {
+   "fieldname": "vech_reason",
+   "fieldtype": "Data",
+   "label": "Vehicle Update Reason"
+  },
+  {
+   "fieldname": "vech_remark",
+   "fieldtype": "Data",
+   "label": "Vehicle Update Remark"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lr_no",
+   "fieldtype": "Data",
+   "label": "Transport Receipt No"
+  },
+  {
+   "fieldname": "lr_date",
+   "fieldtype": "Date",
+   "label": "Transport Receipt Date"
+  },
+  {
+   "fieldname": "vech_result",
+   "fieldtype": "Code",
+   "label": "Vehicle Update Result",
+   "options": "JSON"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-11-03 10:28:39.889095",
+ "modified_by": "Administrator",
+ "module": "Adaequare Gsp",
+ "name": "Ewaybill Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  }
+ ],
+ "search_fields": "linked_with",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "linked_with",
+ "track_changes": 1
+}
