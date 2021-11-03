@@ -78,7 +78,7 @@ class AuthApi:
         self, method, action=None, gstin=None, ewbNo=None, fy="", url_suffix="", data=""
     ):
         if method not in ("get", "post"):
-            frappe.throw("Invalid method", upper(method))
+            frappe.throw("Invalid method", method.upper())
 
         headers = {"Authorization": self.settings.access_token}
 
