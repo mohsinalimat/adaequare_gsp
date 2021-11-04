@@ -36,7 +36,9 @@
   "column_break_4",
   "lr_no",
   "lr_date",
-  "vech_result"
+  "vech_result",
+  "section_break_31",
+  "ewaybill_result"
  ],
  "fields": [
   {
@@ -193,12 +195,22 @@
    "fieldname": "section_break_0",
    "fieldtype": "Section Break",
    "label": "Generate Ewaybill"
+  },
+  {
+   "fieldname": "section_break_31",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ewaybill_result",
+   "fieldtype": "Code",
+   "label": "Ewaybill Result",
+   "options": "JSON"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-03 15:34:45.954223",
+ "modified": "2021-11-04 10:11:19.183032",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Ewaybill Log",

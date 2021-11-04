@@ -1,11 +1,14 @@
 import json
-import frappe
+import pyqrcode
 from datetime import datetime
+
+import frappe
 from frappe.utils import today, random_string
+from frappe.utils.file_manager import save_file
 from erpnext.regional.india.utils import get_ewb_data, validate_state_code
-from frappe.utils.data import DATE_FORMAT
 from adaequare_gsp.api.get_gstin_details import validate_gstin
 from adaequare_gsp.helpers.gstn_ewb_api import GstnEwbApi
+
 
 DATE_FORMAT = "%d/%m/%Y %I:%M:%S %p"
 
@@ -105,6 +108,7 @@ def generate_ewaybill(dt, dn, dia):
 
     api = GstnEwbApi()
     result = api.generate_ewaybill(data)
+    ewaybill_json, qr_base64 = get_ewaybill(result.get("ewayBillNo"))
 
     def log_ewaybill():
         frappe.db.set_value(
@@ -113,6 +117,8 @@ def generate_ewaybill(dt, dn, dia):
             {
                 "ewaybill": result.get("ewayBillNo"),
                 "eway_bill_validity": result.get("validUpto"),
+                "ewaybill_qr": qr_base64,
+                "ewaybill_json": json.dumps(ewaybill_json, indent=4),
             },
         )
         log = frappe.get_doc(
@@ -125,6 +131,7 @@ def generate_ewaybill(dt, dn, dia):
                 "valid_upto": datetime.strptime(result.get("validUpto"), DATE_FORMAT),
                 "linked_with": dn,
                 "result": json.dumps(result, indent=4),
+                "ewaybill_result": json.dumps(ewaybill_json, indent=4),
             }
         )
         log.insert()
@@ -276,6 +283,47 @@ def update_transporter(dt, dn, dia):
         )
 
     log_ewaybill()
+
+
+@frappe.whitelist()
+def print_ewaybill(dt, dn, ewaybill):
+    result, qr_base64 = get_ewaybill(ewaybill)
+
+    def log_ewaybill():
+        frappe.db.set_value(
+            dt,
+            dn,
+            {"ewaybill_qr": qr_base64, "ewaybill_json": json.dumps(result, indent=4)},
+        )
+        frappe.db.set_value(
+            "Ewaybill Log", ewaybill, {"ewaybill_result": json.dumps(result, indent=4)}
+        )
+
+    log_ewaybill()
+    generate_ewaybill_pdf(dt, dn, ewaybill)
+    # generate print format
+
+
+def get_ewaybill(ewaybill):
+    api = GstnEwbApi()
+    result = api.get_ewaybill(ewaybill)
+    ewaybill_date = datetime.strptime(result.ewayBillDate, DATE_FORMAT)
+    qr_text = (
+        ewaybill
+        + "/"
+        + result.userGstin
+        + "/"
+        + datetime.strftime(ewaybill_date, "%d-%m-%Y %H:%M:%S")
+    )
+    qr_base64 = pyqrcode.create(qr_text).png_as_base64_str(scale=5, quiet_zone=1)
+    return result, qr_base64
+
+
+def generate_ewaybill_pdf(dt, dn, ewaybill):
+    doc = frappe.get_doc(dt, dn)
+    ewaybill_html = frappe.get_print(dt, dn, "Ewaybill", doc=doc, no_letterhead=1)
+    ewaybill_pdf = frappe.utils.pdf.get_pdf(ewaybill_html)
+    save_file(ewaybill + "-" + dn + ".pdf", ewaybill_pdf, dt, dn, is_private=1)
 
 
 # Update Print Format

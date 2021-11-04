@@ -17,7 +17,7 @@ class GstnEwbApi(AuthApi):
         response = self.make_request(
             method="get", ewbNo=ewbNo, url_suffix="ewayapi/GetEwayBill?"
         )
-        return response
+        return frappe._dict(response)
 
     # generate post methods with different actions.
     def make_post_request(self, action, data):

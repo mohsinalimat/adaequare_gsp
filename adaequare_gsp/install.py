@@ -16,6 +16,7 @@ def update_custom_fields():
 
 def make_custom_fields():
     create_custom_fields(custom_fields)
+    create_custom_fields(invoice_fields)
     frappe.db.commit()
 
 
@@ -82,3 +83,24 @@ gstin_fields = [
 ]
 
 custom_fields = {"Supplier": gstin_fields, "Customer": gstin_fields}
+invoice_fields = {
+    "Sales Invoice": [
+        {
+            "fieldname": "ewaybill_json",
+            "label": _("Ewaybill JSON"),
+            "fieldtype": "Code",
+            "insert_after": "eway_bill_validity",
+            "hidden": 1,
+            "options": "JSON",
+            "translatable": 0,
+        },
+        {
+            "fieldname": "ewaybill_qr",
+            "label": _("Ewaybill QR"),
+            "fieldtype": "Long Text",
+            "insert_after": "ewaybill_json",
+            "hidden": 1,
+            "translatable": 0,
+        },
+    ]
+}

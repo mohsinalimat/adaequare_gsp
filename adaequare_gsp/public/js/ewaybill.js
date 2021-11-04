@@ -27,6 +27,11 @@ for (let dt of ewaybill_doctype_list) {
                     }, 'Ewaybill');
                     // add other buttons
                 }
+                if (frm.doc.docstatus == 1 && frm.doc.ewaybill) {
+                    frm.add_custom_button('Reprint Ewaybill', () => {
+                        adaequare_gsp.reprint_ewaybill(frm)
+                    }, 'Ewaybill');
+                }
                 if (!frm.doc.gst_transporter_id &&
                 (adaequare_gsp.get_date(frm.doc.eway_bill_validity) < now.addHours(8) ||
                     adaequare_gsp.get_date(frm.doc.eway_bill_validity).addHours(8) > now)) {
@@ -39,7 +44,23 @@ for (let dt of ewaybill_doctype_list) {
     })
 }
 
+adaequare_gsp.reprint_ewaybill = function (frm) {
+    if (!ewaybill_doctype_list.includes(frm.doc.doctype)) return;
+    frappe.call({
+        method: 'adaequare_gsp.api.ewaybill.print_ewaybill',
+        args: {
+            dt: frm.doc.doctype,
+            dn: frm.doc.name,
+            ewaybill: frm.doc.ewaybill,
+        },
+        callback: function (r) {
+            frm.reload_doc()
+            frappe.msgprint(__('Ewaybill Print Generated Successfully.'))
+        }
+    })
+}
 adaequare_gsp.dialog_generate_ewaybill = function (frm) {
+    if (!ewaybill_doctype_list.includes(frm.doc.doctype)) return;
      let d = new frappe.ui.Dialog({
         title: 'Verify Details',
         fields: [
@@ -160,6 +181,7 @@ adaequare_gsp.dialog_generate_ewaybill = function (frm) {
 }
 
 adaequare_gsp.dialog_cancel_ewaybill = function (frm) {
+    if (!ewaybill_doctype_list.includes(frm.doc.doctype)) return;
      let d = new frappe.ui.Dialog({
         title: 'Are you sure you would like to cancel Ewaybill',
         fields: [
@@ -207,6 +229,7 @@ adaequare_gsp.dialog_cancel_ewaybill = function (frm) {
 }
 
 adaequare_gsp.dialog_update_vehicle_info = function (frm) {
+    if (!ewaybill_doctype_list.includes(frm.doc.doctype)) return;
      let d = new frappe.ui.Dialog({
         title: 'Update Vehicle Information',
         fields: [
@@ -296,6 +319,7 @@ adaequare_gsp.dialog_update_vehicle_info = function (frm) {
 }
 
 adaequare_gsp.dialog_update_transporter = function (frm) {
+    if (!ewaybill_doctype_list.includes(frm.doc.doctype)) return;
      let d = new frappe.ui.Dialog({
         title: 'Update Transporter',
         fields: [
