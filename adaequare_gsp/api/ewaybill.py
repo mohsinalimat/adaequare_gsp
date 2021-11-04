@@ -39,6 +39,11 @@ def get_ewaybill_data(dt, dn):
 
 
 def update_invoice(dt, dn, dia):
+    transporter_name = (
+        frappe.db.get_value("Supplier", dia.get("transporter"), "supplier_name")
+        if dia.get("transporter")
+        else None
+    )
     if dia.get("gst_transporter_id") and not validate_gstin(
         dia.get("gst_transporter_id")
     ):
@@ -48,6 +53,7 @@ def update_invoice(dt, dn, dia):
         dn,
         {
             "transporter": dia.get("transporter"),
+            "transporter_name": transporter_name,
             "gst_transporter_id": dia.get("gst_transporter_id"),
             "vehicle_no": dia.get("vehicle_no"),
             "distance": dia.get("distance"),
@@ -63,7 +69,7 @@ def update_invoice(dt, dn, dia):
 
 
 def validate_invoice_for_ewaybill(doc, method=None):
-    if doc.get("posting_date") > today:
+    if doc.get("posting_date") > today():
         frappe.throw("Invoice date cannot be a future date.")
 
     if doc.get("lr_date") and doc.get("lr_date") < doc.get("posting_date"):
@@ -191,7 +197,7 @@ def update_vehicle_info(dt, dn, dia):
         "reasonCode": dia.get("reason").split("-")[0],
         "reasonRem": dia.get("remark"),
         "transDocNo": dia.get("lr_no"),
-        "transDocDate": dia.get("lr_date"),
+        "transDocDate": frappe.utils.formatdate(dia.get("lr_date"), "dd/mm/yyyy"),
         "transMode": transport_modes.get(dia.get("mode_of_transport")),
         "vehicleType": vehicle_types.get(dia.get("gst_vehicle_type")),
     }
@@ -221,8 +227,8 @@ def update_vehicle_info(dt, dn, dia):
                 "from_state": data.get("fromState"),
                 "vech_reason": dia.get("reason"),
                 "vech_remark": dia.get("remark"),
-                "lr_no": data.get("transDocNo"),
-                "lr_date": data.get("transDocDate"),
+                "lr_no": dia.get("lr_no"),
+                "lr_date": dia.get("lr_date"),
                 "valid_upto": datetime.strptime(result.get("validUpto"), DATE_FORMAT),
                 "vech_date": datetime.strptime(result.get("vehUpdDate"), DATE_FORMAT),
                 "vech_result": json.dumps(result, indent=4),
@@ -243,10 +249,17 @@ def update_transporter(dt, dn, dia):
     result = api.update_transporter(data)
 
     def log_ewaybill():
+        transporter_name = (
+            frappe.db.get_value("Supplier", dia.get("transporter"), "supplier_name")
+            if dia.get("transporter")
+            else None
+        )
         frappe.db.set_value(
             dt,
             dn,
             {
+                "transporter": dia.get("transporter"),
+                "transporter_name": transporter_name,
                 "gst_transporter_id": dia.get("gst_transporter_id"),
             },
         )
@@ -274,5 +287,13 @@ def update_transporter(dt, dn, dia):
 # update invoice
 # update log
 
+# Pending Things
+# - Download Ewaybill data and generate print format
+# - Extend ewaybill validity
+# - Save QR text in log
+# - for sales return and purchase return
+
+# - Validate GST account / tax rates / with states / reverse charge.
+# - Add Round-off to Other Value - Pull Request
+# - Add Bill-From and Ship from along with Both, based on Dispatch Address
 # additional validations in erpnext PR
-# for sales return and purchase return

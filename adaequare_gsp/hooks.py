@@ -100,7 +100,7 @@ doc_events = {
         "validate": "adaequare_gsp.monkey_patches.create_party.validate_address"
     },
     "Sales Invoice": {
-        "validate": "adaequare_gsp.api.ewaybill.validate_invoice_for_ewaybill"
+        "before_submit": "adaequare_gsp.api.ewaybill.validate_invoice_for_ewaybill"
     },
 }
 

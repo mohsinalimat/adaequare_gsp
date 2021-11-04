@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_0",
   "ewaybill",
   "ewaybill_date",
   "valid_upto",
@@ -72,7 +73,8 @@
   {
    "depends_on": "eval: doc.is_cancelled == 1",
    "fieldname": "section_break1",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Cancel Ewaybill"
   },
   {
    "default": "0",
@@ -108,7 +110,8 @@
   {
    "depends_on": "eval: doc.trans_update_date",
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Update Transporter"
   },
   {
    "fieldname": "gst_transporter_id",
@@ -133,7 +136,8 @@
   {
    "depends_on": "eval: doc.vech_date",
    "fieldname": "section_break_19",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Update Vehicle Info"
   },
   {
    "fieldname": "vech_date",
@@ -184,12 +188,17 @@
    "fieldtype": "Code",
    "label": "Vehicle Update Result",
    "options": "JSON"
+  },
+  {
+   "fieldname": "section_break_0",
+   "fieldtype": "Section Break",
+   "label": "Generate Ewaybill"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-03 10:28:39.889095",
+ "modified": "2021-11-03 15:34:45.954223",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Ewaybill Log",

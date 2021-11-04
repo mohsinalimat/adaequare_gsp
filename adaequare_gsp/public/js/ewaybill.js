@@ -6,13 +6,16 @@ for (let dt of ewaybill_doctype_list) {
             frappe.model.get_value('Adaequare Settings', 'Adaequare Settings', 'gstn_ewb_api',
             function (d) {
                 if (d.gstn_ewb_api == 0) return;
-                if (!frm.doc.ewaybill) {
+                if (!frm.doc.ewaybill && frm.doc.docstatus == 1) {
                     frm.add_custom_button('Generate Ewaybill', () => {
                         adaequare_gsp.dialog_generate_ewaybill(frm)
                     }, 'Ewaybill');
                 }
                 let now = new Date()
-                if (frm.doc.ewaybill && frm.doc.eway_bill_validity && adaequare_gsp.get_date(frm.doc.eway_bill_validity) > now ) {
+                if (frm.doc.docstatus == 1 &&
+                frm.doc.ewaybill &&
+                frm.doc.eway_bill_validity &&
+                adaequare_gsp.get_date(frm.doc.eway_bill_validity) > now) {
                     frm.add_custom_button('Update Vehicle Info', () => {
                         adaequare_gsp.dialog_update_vehicle_info(frm)
                     }, 'Ewaybill');
@@ -24,7 +27,9 @@ for (let dt of ewaybill_doctype_list) {
                     }, 'Ewaybill');
                     // add other buttons
                 }
-                if (!frm.doc.gst_transporter_id && (adaequare_gsp.get_date(frm.doc.eway_bill_validity) < now.addHours(8) || adaequare_gsp.get_date(frm.doc.eway_bill_validity).addHours(8) > now)) {
+                if (!frm.doc.gst_transporter_id &&
+                (adaequare_gsp.get_date(frm.doc.eway_bill_validity) < now.addHours(8) ||
+                    adaequare_gsp.get_date(frm.doc.eway_bill_validity).addHours(8) > now)) {
                     // frm.add_custom_button('Extend Validity', () => {
                     //     adaequare_gsp.dialog_extend_validity(frm)
                     // }, 'Ewaybill');
@@ -43,14 +48,26 @@ adaequare_gsp.dialog_generate_ewaybill = function (frm) {
                 fieldname: 'transporter',
                 fieldtype: 'Link',
                 options: 'Supplier',
-			    default: frm.doc.transporter
+                default: frm.doc.transporter,
+                get_query: () => {
+					return {
+						filters: {
+							is_transporter: 1,
+						},
+					};
+                },
+                onchange: function (e) {
+                    adaequare_gsp.get_gst_tranporter_id(cur_dialog.fields_dict.transporter.value)
+                },
             },
             {
                 label: 'GST Transporter ID',
                 fieldname: 'gst_transporter_id',
                 fieldtype: 'Data',
                 fetch_from: 'transporter.gst_transporter_id',
-                default: (frm.doc.gst_transporter_id && frm.doc.gst_transporter_id.length == 15) ? frm.doc.gst_transporter_id : ''
+                default: (frm.doc.gst_transporter_id &&
+                    frm.doc.gst_transporter_id.length == 15) ?
+                    frm.doc.gst_transporter_id : ''
             },
             {
                 label: 'Vehicle No',
@@ -294,14 +311,23 @@ adaequare_gsp.dialog_update_transporter = function (frm) {
                 fieldname: 'transporter',
                 fieldtype: 'Link',
                 options: 'Supplier',
-			    default: frm.doc.transporter
+                default: frm.doc.transporter,
+                get_query: () => {
+					return {
+						filters: {
+							is_transporter: 1,
+						},
+					};
+                },
+                onchange: function () {
+                    adaequare_gsp.get_gst_tranporter_id(cur_dialog.fields_dict.transporter.value)
+                },
             },
             {
                 label: 'GST Transporter ID',
                 fieldname: 'gst_transporter_id',
                 fieldtype: 'Data',
                 reqd: 1,
-                fetch_from: 'transporter.gst_transporter_id',
                 default: (frm.doc.gst_transporter_id && frm.doc.gst_transporter_id.length == 15) ? frm.doc.gst_transporter_id : ''
             }
         ],
@@ -326,10 +352,24 @@ adaequare_gsp.dialog_update_transporter = function (frm) {
     d.show();
 }
 
+adaequare_gsp.get_gst_tranporter_id = function (transporter) {
+    frappe.model.get_value('Supplier', transporter, 'gst_transporter_id',
+        function (r) {
+            cur_dialog.fields_dict.gst_transporter_id.value = r.gst_transporter_id
+            cur_dialog.refresh()
+        }
+    );
+}
+
 adaequare_gsp.get_date = function (text) {
     text = text.split(/[\s:\/]+/)
     let add_hours = text[6] == 'PM' ? 12 : 0
-    return new Date(text[2], parseInt(text[1])-1, text[0], parseInt(text[3])+add_hours, text[4], text[5])
+    return new Date(text[2],
+        parseInt(text[1]) - 1,
+        text[0],
+        parseInt(text[3]) + add_hours,
+        text[4],
+        text[5])
 }
 
 Date.prototype.addHours = function(h) {
