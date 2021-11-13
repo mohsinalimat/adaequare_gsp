@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-{% set ewb = json.loads(doc.ewaybill_json)%}
+{% set ewb = json.loads(doc.ewaybill_json)%} {% set transType = { 1: "Regular",
+2: "Bill To - Ship To", 3: "Bill From - Dispatch From", 4: "Combination of 2 and
+3"}%}{% set transport_modes = { "1": 'Road', "2": 'Rail', "3": 'Air', "4":
+'Ship' }%}
 <html lang="en">
     <body>
         <div class="pagelayout">
@@ -26,7 +29,7 @@
                             <div style="height: 2px"></div>
                             <div>
                                 <img
-                                    src="data:image/gif;base64,R0lGODdhiACIAIAAAAAAAP///ywAAAAAiACIAAAC/4yPqcvtD6OctNqLs86g+w+GIvJRIkB6UHmwzgnHaCvXbnCvI93pPT972YapYa0YjJyQvmRuYbQho0ugaWd4Km7aBFXGvHBV0G+SEQ1nyZbxr83GxafG5tGKh7/l++u+a3ZWRpTHJyjhdqgUB2hmB1bY1aRmWLX2h+XFOAdkaejnBHkZihlD6XnKOeopOUgKk1oKG5kZq3g3CkoXYrsLYtsoiyb6OZHIuimLrJzZitic/OqbCAzNzFuIsSxNa9r9uj0dvVE5/i0u/B3eaa0ISn3Ojp2r3j48X0y+qtpwbF+PL9ivbBtQPfAX0Ny+hH3kcdNXrqGQawPpWYxYMZ8mhv/uxNQ6GG3dRV0OnfWr43CSx3R6wH18Rmhhx5HGFFZAmPEdMYNb+KmkCdMlPp3eZP68GTKQTXgXmWp0qrRdVJZPl1qlijMQOiq94jW9+hCj1pKOvFbFCrZaVIgtoRK7F5atXA7/ZJp0OjcvUo5bj5rUC3hjxqw+zQZO6YqnYF+P+K4UOsto4peLEU+MrJGkXan8cJ2k2Hhw4ctbccJVrHamWJuaV3MkTJUoZLild1JmTDZ2zdedk37BfRl23N2ihwLkavlzccx/J4N2VbsoRtldN0tcdD116OY9HX+V3pp28tO3QXo/izk89PHOcxJ3S5F7ZdLsu6c3v5z6eqCZ9wv/FmhacvIphhdB9pF33TYB8ofgLawZON9/vfH2HIPticffXRO6J1mHEUbHIXpTDfedFPX1Z919JY5ISWoKbtigZy6WlaFvzFEGIEoH5oZcjfFxlqCN8OXHVoEeyiWcdhBq8+CRRQoJlpF06eYkREke12JBTU53mGsmppjGkjweheRUIHqmIXj+lbkWj2FamCKZT7YJpo4oSmjcjhrkeB6aUGY35nFS8klknIKO5uWMVN7p549oqWmfSIlCSOiQksrYnqV16dOog3ni+SWjdqL23qbAKfemqDFxuadtQX565papkhqUpKfG6Kqnob74aogYgpplpDYGyyqqGw547Jan/9p64q3NrikgorySWGyD1hJ3LZzFMlslqFcKC2hwyT6qGrLSYdptaNmiJ6e4FIZIq7G9DtmuvMsRWJ67utKLH5Pk/sqvnsqtC7C0afkX8IfQpmsYwrIe7GO540q8aHWqhjWowfNqTK1Ayw7rJsjaKumhx9FW6OWCdxb8LrEqvzyqqf2eXGiElwJ543l+4exsq73qt6LMDA+9l65Aiyh0tRfOaXSp5HKrNLiqqTcyzX1Rmm/R6Kb8FtaQDixmW13X+XWliFpMTqqxfmp2uDaf7bSKXJc9sbnUpi3y2yhbjO+i8rEMb5QwYunwz1rubVbfGOP4sNs7sy244UFLfvHHG//TDevMEY8lMNRqP0vf5jTqXTOIBGPrtVKAZ7xqz9h1bObCc8V789NZb91l1MAm/ifFcudO+6aaZm5o7lKry7ujvgc/IuX++mr1oW43P7jP0Jcc+fVzh0rs0esOrz31zj+WZs3fgt3S1SWeTvbycFfdea4uM9760kE9rz679nt7e9bdaz6p9e3PdPixW/6Eg8C8tW1XwpNfyJQHs8v1aFu9U9S9csU61UWveEg7V8x09sCcmc+BoVuZ7Dw3ttcdkGP/E5jl9uW/wonwcVNLXQbjtbqkoQ2AL8SV42SIQgjSr2klxCEQk5ZAyI0vfsRDXwArF0KTufCIP2TiDKnIvdRa0fBvYXOiFDtIxIsRimoq1CLhrMg+3f2qNV9U2Q67ZUT4kQ5wrrvhxGTDOd3FcY77y+DaRDjGx8yvT9XbXqcCmT4bQox0LDrRHt9IQb+9z3iUrKQlL4lJDRQAADs="
+                                    src="data:image/png;base64,{{doc.ewaybill_qr}}"
                                     width="136"
                                     height="136"
                                     style="width: 136 !important"
@@ -49,8 +52,7 @@
                         </td>
                         <td>
                             <span style="font-size: 18px; font-weight: bold">
-                                {%for i in range(0,4)%}
-                                {{ewb.ewbNo[i][0]|string}} {% endfor %}
+                                {{add_spacing(ewb.ewbNo, 4)}}
                             </span>
                         </td>
                     </tr>
@@ -60,7 +62,8 @@
                         </td>
                         <td>
                             <span style="font-weight: bold"
-                                >30/10/2021 11:52 AM</span
+                                >{{ ewb.ewayBillDate | replace(":00 ", "
+                                ")}}</span
                             >
                         </td>
                     </tr>
@@ -70,8 +73,8 @@
                         </td>
                         <td>
                             <span style="font-weight: bold">
-                                24AAU PV746 8F1ZW - SHALIBHADRA METAL
-                                CORPORATION</span
+                                {{add_spacing(ewb.userGstin, 5)}}{{" -
+                                "}}{{ewb.fromTrdName}}</span
                             >
                         </td>
                     </tr>
@@ -81,7 +84,8 @@
                         </td>
                         <td>
                             <span style="font-weight: bold"
-                                >30/10/2021 11:52 AM [1Kms]</span
+                                >{{ ewb.ewayBillDate | replace(":00 ", " ")}}
+                                {{" ["}}{{ewb.actualDist}}{{"Kms]"}}</span
                             >
                         </td>
                     </tr>
@@ -90,7 +94,9 @@
                             <span>Valid Until:</span>
                         </td>
                         <td>
-                            <span style="font-weight: bold">31/10/2021 </span>
+                            <span style="font-weight: bold"
+                                >{{ewb.validUpto[:10]}}
+                            </span>
                         </td>
                     </tr>
                     <tr style="border-top: 2px solid Gray">
@@ -102,8 +108,8 @@
                         <td>GSTIN of Supplier</td>
                         <td>
                             <span style="font-weight: bold"
-                                >24AAUPV7468F1ZW,Shalibhadra Metal
-                                Corporation</span
+                                >{{add_spacing(ewb.fromGstin, 5)}}-
+                                {{ewb.fromTrdName}}</span
                             >
                         </td>
                     </tr>
@@ -111,16 +117,18 @@
                         <td>Place of Dispatch</td>
                         <td>
                             <span style="font-weight: bold"
-                                >Vadodara,GUJARAT-391243</span
-                            >
+                                >{{ewb.fromPlace}},
+                                {{get_state(ewb.actFromStateCode)}} -
+                                {{ewb.fromPincode}}
+                            </span>
                         </td>
                     </tr>
                     <tr>
                         <td>GSTIN of Recipient</td>
                         <td>
                             <span style="font-weight: bold">
-                                24AAO FP206 3N1ZV ,Pat Tech Fitwell Tube
-                                Components</span
+                                {{add_spacing(ewb.toGstin, 5)}}-
+                                {{ewb.toTrdName}}</span
                             >
                         </td>
                     </tr>
@@ -129,7 +137,9 @@
                         <td>
                             <span
                                 ><span style="font-weight: bold"
-                                    >Vadodara,GUJARAT-391243
+                                    >{{ewb.toPlace}},
+                                    {{get_state(ewb.actToStateCode)}} -
+                                    {{ewb.toPincode}}
                                 </span>
                             </span>
                         </td>
@@ -139,7 +149,7 @@
                         <td>
                             <span
                                 ><span style="font-weight: bold"
-                                    >SINV-21-00326
+                                    >{{ewb.docNo}}
                                 </span>
                             </span>
                         </td>
@@ -149,7 +159,7 @@
                         <td>
                             <span
                                 ><span style="font-weight: bold"
-                                    >30/10/2021
+                                    >{{ewb.docDate}}
                                 </span>
                             </span>
                         </td>
@@ -159,14 +169,17 @@
                             <span>Transaction Type:</span>
                         </td>
                         <td>
-                            <span style="font-weight: bold">Regular</span>
+                            <span style="font-weight: bold"
+                                >{{transType[ewb.transactionType]}}</span
+                            >
                         </td>
                     </tr>
                     <tr>
                         <td>Value of Goods</td>
                         <td>
                             <span class="classfont" style="font-weight: bold"
-                                >` 228735</span
+                                >{{frappe.format(ewb.totInvValue, {'fieldtype':
+                                'Currency'})}}</span
                             >
                         </td>
                     </tr>
@@ -177,7 +190,9 @@
                                 class="form-control1"
                                 onkeydown="expandtext(this);"
                                 style="font-weight: bold"
-                                >73041990 -
+                                >{{ ewb.itemList[0].hsnCode}} {%if
+                                ewb.itemList[0].productDesc%}{{" - " ~
+                                ewb.itemList[0].productDesc}} {%endif%}
                             </span>
                         </td>
                     </tr>
@@ -185,14 +200,18 @@
                         <td>Reason for Transportation</td>
                         <td>
                             <span style="font-weight: bold"
-                                >Outward - Supply</span
+                                >Outward -
+                                {{get_sub_supply_type(ewb.subSupplyType)}}</span
                             >
                         </td>
                     </tr>
                     <tr>
                         <td>Transporter</td>
                         <td>
-                            <span style="font-weight: bold"></span>
+                            <span style="font-weight: bold"
+                                >{{add_spacing(ewb.transporterId, 5)}}-
+                                {{ewb.transporterName}}</span
+                            >
                         </td>
                     </tr>
                     <tr style="border-top: 2px solid Gray">
@@ -233,15 +252,26 @@
                                                 (If any)
                                             </th>
                                         </tr>
+                                        {% for detail in ewb.VehiclListDetails%}
                                         <tr>
-                                            <td>Road</td>
-                                            <td>GJ06YY4230</td>
-                                            <td>Vadodara</td>
-                                            <td>30-10-2021 11:52 AM</td>
-                                            <td>24AAUPV7468F1ZW</td>
+                                            <td>
+                                                {{transport_modes[detail.transMode]}}
+                                            </td>
+                                            <td>
+                                                {{detail.vehicleNo}} /
+                                                {{detail.transDocNo}} Dt:
+                                                {{detail.transDocDate}}
+                                            </td>
+                                            <td>{{detail.fromPlace}}</td>
+                                            <td>
+                                                {{detail.enteredDate |
+                                                replace(":00 ", " ")}}
+                                            </td>
+                                            <td>{{detail.userGSTINTransin}}</td>
                                             <td>-</td>
                                             <td>-</td>
                                         </tr>
+                                        {% endfor%}
                                     </tbody>
                                 </table>
                             </div>

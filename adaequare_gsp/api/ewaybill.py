@@ -108,14 +108,15 @@ def generate_ewaybill(dt, dn, dia):
 
     api = GstnEwbApi()
     result = api.generate_ewaybill(data)
-    ewaybill_json, qr_base64 = get_ewaybill(result.get("ewayBillNo"))
+    ewaybill = result.get("ewayBillNo")
+    ewaybill_json, qr_base64 = get_ewaybill(ewaybill)
 
     def log_ewaybill():
         frappe.db.set_value(
             dt,
             dn,
             {
-                "ewaybill": result.get("ewayBillNo"),
+                "ewaybill": ewaybill,
                 "eway_bill_validity": result.get("validUpto"),
                 "ewaybill_qr": qr_base64,
                 "ewaybill_json": json.dumps(ewaybill_json, indent=4),
@@ -124,7 +125,7 @@ def generate_ewaybill(dt, dn, dia):
         log = frappe.get_doc(
             {
                 "doctype": "Ewaybill Log",
-                "ewaybill": result.get("ewayBillNo"),
+                "ewaybill": ewaybill,
                 "ewaybill_date": datetime.strptime(
                     result.get("ewayBillDate"), DATE_FORMAT
                 ),
@@ -137,6 +138,7 @@ def generate_ewaybill(dt, dn, dia):
         log.insert()
 
     log_ewaybill()
+    generate_ewaybill_pdf(dt, dn, ewaybill)
     return result.alert
 
 
@@ -309,7 +311,7 @@ def get_ewaybill(ewaybill):
     result = api.get_ewaybill(ewaybill)
     ewaybill_date = datetime.strptime(result.ewayBillDate, DATE_FORMAT)
     qr_text = (
-        ewaybill
+        str(ewaybill)
         + "/"
         + result.userGstin
         + "/"
@@ -320,10 +322,25 @@ def get_ewaybill(ewaybill):
 
 
 def generate_ewaybill_pdf(dt, dn, ewaybill):
+    delete_ewaybill_pdf(dt, dn, ewaybill)
     doc = frappe.get_doc(dt, dn)
     ewaybill_html = frappe.get_print(dt, dn, "Ewaybill", doc=doc, no_letterhead=1)
     ewaybill_pdf = frappe.utils.pdf.get_pdf(ewaybill_html)
     save_file(ewaybill + "-" + dn + ".pdf", ewaybill_pdf, dt, dn, is_private=1)
+
+
+def delete_ewaybill_pdf(dt, dn, ewaybill):
+    doc_list = frappe.db.get_all(
+        "File",
+        filters={
+            "attached_to_doctype": dt,
+            "attached_to_name": dn,
+            "file_name": ["like", str(ewaybill) + "%"],
+        },
+        pluck="name",
+    )
+    for doc in doc_list:
+        frappe.delete_doc("File", doc)
 
 
 # Update Print Format
@@ -336,9 +353,6 @@ def generate_ewaybill_pdf(dt, dn, ewaybill):
 # update log
 
 # Pending Things
-# - Download Ewaybill data and generate print format
-# - Extend ewaybill validity
-# - Save QR text in log
 # - for sales return and purchase return
 
 # - Validate GST account / tax rates / with states / reverse charge.

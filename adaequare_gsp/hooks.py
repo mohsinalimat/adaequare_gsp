@@ -16,6 +16,14 @@ app_license = "MIT"
 # app_include_css = "/assets/adaequare_gsp/css/adaequare_gsp.css"
 app_include_js = "/assets/js/adaequare_gsp.min.js"
 
+jenv = {
+    "methods": [
+        "add_spacing:adaequare_gsp.utils.add_spacing",
+        "get_state:adaequare_gsp.utils.get_state",
+        "get_sub_supply_type:adaequare_gsp.utils.get_sub_supply_type",
+    ],
+}
+
 # include js, css files in header of web template
 # web_include_css = "/assets/adaequare_gsp/css/adaequare_gsp.css"
 # web_include_js = "/assets/adaequare_gsp/js/adaequare_gsp.js"
