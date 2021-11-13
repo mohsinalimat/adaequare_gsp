@@ -32,8 +32,11 @@ for (let dt of ewaybill_doctype_list) {
                         adaequare_gsp.reprint_ewaybill(frm)
                     }, 'Ewaybill');
                 }
-                if (!frm.doc.gst_transporter_id &&
-                (adaequare_gsp.get_date(frm.doc.eway_bill_validity) < now.addHours(8) ||
+                if (frm.doc.docstatus == 1 &&
+                    frm.doc.ewaybill &&
+                    frm.doc.eway_bill_validity &&
+                    !frm.doc.gst_transporter_id &&
+                    (adaequare_gsp.get_date(frm.doc.eway_bill_validity) < now.addHours(8) ||
                     adaequare_gsp.get_date(frm.doc.eway_bill_validity).addHours(8) > now)) {
                     // frm.add_custom_button('Extend Validity', () => {
                     //     adaequare_gsp.dialog_extend_validity(frm)

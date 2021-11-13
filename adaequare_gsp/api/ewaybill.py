@@ -3,6 +3,7 @@ import pyqrcode
 from datetime import datetime
 
 import frappe
+from frappe import publish_progress, _
 from frappe.utils import today, random_string
 from frappe.utils.file_manager import save_file
 from erpnext.regional.india.utils import get_ewb_data, validate_state_code
@@ -102,14 +103,25 @@ def validate_state_tax(data):
 
 @frappe.whitelist()
 def generate_ewaybill(dt, dn, dia):
+    progress = frappe._dict(
+        title=_("Generating Ewaybill"), percent=0, doctype=dt, docname=dn
+    )
+    publish_progress(**progress)
+
     dia = json.loads(dia)
     update_invoice(dt, dn, dia)
     data = get_ewaybill_data(dt, dn)
 
+    progress.percent = 33
+    publish_progress(**progress)
+
     api = GstnEwbApi()
     result = api.generate_ewaybill(data)
-    ewaybill = result.get("ewayBillNo")
+    ewaybill = str(result.get("ewayBillNo"))
     ewaybill_json, qr_base64 = get_ewaybill(ewaybill)
+
+    progress.percent = 66
+    publish_progress(**progress)
 
     def log_ewaybill():
         frappe.db.set_value(
@@ -139,6 +151,10 @@ def generate_ewaybill(dt, dn, dia):
 
     log_ewaybill()
     generate_ewaybill_pdf(dt, dn, ewaybill)
+
+    progress.percent = 100
+    publish_progress(**progress)
+
     return result.alert
 
 
@@ -148,7 +164,17 @@ def generate_ewaybill(dt, dn, dia):
 
 @frappe.whitelist()
 def cancel_ewaybill(dt, dn, dia):
+    progress = frappe._dict(
+        title=_("Cancelling Ewaybill"), percent=0, doctype=dt, docname=dn
+    )
+    publish_progress(**progress)
+
     dia = json.loads(dia)
+    delete_ewaybill_pdf(dt, dn, dia.get("ewaybill"))
+
+    progress.percent = 33
+    publish_progress(**progress)
+
     data = {
         "ewbNo": dia.get("ewaybill"),
         "cancelRsnCode": dia.get("reason").split("-")[0],
@@ -156,6 +182,9 @@ def cancel_ewaybill(dt, dn, dia):
     }
     api = GstnEwbApi()
     result = api.cancel_ewaybill(data)
+
+    progress.percent = 66
+    publish_progress(**progress)
 
     def log_ewaybill():
         frappe.db.set_value(
@@ -179,10 +208,17 @@ def cancel_ewaybill(dt, dn, dia):
         )
 
     log_ewaybill()
+    progress.percent = 100
+    publish_progress(**progress)
 
 
 @frappe.whitelist()
 def update_vehicle_info(dt, dn, dia):
+    progress = frappe._dict(
+        title=_("Updating Vehicle Info"), percent=0, doctype=dt, docname=dn
+    )
+    publish_progress(**progress)
+
     dia = json.loads(dia)
 
     transport_modes = {"Road": 1, "Rail": 2, "Air": 3, "Ship": 4}
@@ -211,8 +247,14 @@ def update_vehicle_info(dt, dn, dia):
         "vehicleType": vehicle_types.get(dia.get("gst_vehicle_type")),
     }
 
+    progress.percent = 33
+    publish_progress(**progress)
+
     api = GstnEwbApi()
     result = api.update_vehicle_info(data)
+
+    progress.percent = 66
+    publish_progress(**progress)
 
     def log_ewaybill():
         frappe.db.set_value(
@@ -246,16 +288,30 @@ def update_vehicle_info(dt, dn, dia):
 
     log_ewaybill()
 
+    progress.percent = 100
+    publish_progress(**progress)
+
 
 @frappe.whitelist()
 def update_transporter(dt, dn, dia):
+    progress = frappe._dict(
+        title=_("Updating Transporter Info"), percent=0, doctype=dt, docname=dn
+    )
+    publish_progress(**progress)
+
     dia = json.loads(dia)
     data = {
         "ewbNo": dia.get("ewaybill"),
         "transporterId": dia.get("gst_transporter_id"),
     }
+    progress.percent = 33
+    publish_progress(**progress)
+
     api = GstnEwbApi()
     result = api.update_transporter(data)
+
+    progress.percent = 66
+    publish_progress(**progress)
 
     def log_ewaybill():
         transporter_name = (
@@ -286,10 +342,23 @@ def update_transporter(dt, dn, dia):
 
     log_ewaybill()
 
+    progress.percent = 100
+    publish_progress(**progress)
+
 
 @frappe.whitelist()
 def print_ewaybill(dt, dn, ewaybill):
+    progress = frappe._dict(
+        title=_("Generating Ewaybill PDF"), percent=0, doctype=dt, docname=dn
+    )
+
+    progress.percent = 33
+    publish_progress(**progress)
+
     result, qr_base64 = get_ewaybill(ewaybill)
+
+    progress.percent = 66
+    publish_progress(**progress)
 
     def log_ewaybill():
         frappe.db.set_value(
@@ -303,6 +372,9 @@ def print_ewaybill(dt, dn, ewaybill):
 
     log_ewaybill()
     generate_ewaybill_pdf(dt, dn, ewaybill)
+
+    progress.percent = 100
+    publish_progress(**progress)
     # generate print format
 
 
@@ -311,7 +383,7 @@ def get_ewaybill(ewaybill):
     result = api.get_ewaybill(ewaybill)
     ewaybill_date = datetime.strptime(result.ewayBillDate, DATE_FORMAT)
     qr_text = (
-        str(ewaybill)
+        ewaybill
         + "/"
         + result.userGstin
         + "/"
@@ -335,7 +407,7 @@ def delete_ewaybill_pdf(dt, dn, ewaybill):
         filters={
             "attached_to_doctype": dt,
             "attached_to_name": dn,
-            "file_name": ["like", str(ewaybill) + "%"],
+            "file_name": ["like", ewaybill + "%"],
         },
         pluck="name",
     )
