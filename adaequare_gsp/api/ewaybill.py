@@ -112,11 +112,15 @@ def generate_ewaybill(dt, dn, dia):
     update_invoice(dt, dn, dia)
     data = get_ewaybill_data(dt, dn)
 
-    progress.percent = 33
+    progress.percent = 20
     publish_progress(**progress)
 
     api = GstnEwbApi()
     result = api.generate_ewaybill(data)
+
+    progress.percent = 40
+    publish_progress(**progress)
+
     ewaybill = str(result.get("ewayBillNo"))
     ewaybill_json, qr_base64 = get_ewaybill(ewaybill)
 
@@ -156,10 +160,6 @@ def generate_ewaybill(dt, dn, dia):
     publish_progress(**progress)
 
     return result.alert
-
-
-# print ewaybill
-# validations for cancel of invoice
 
 
 @frappe.whitelist()
@@ -425,7 +425,6 @@ def delete_ewaybill_pdf(dt, dn, ewaybill):
 # update log
 
 # Pending Things
-# - for sales return and purchase return
 
 # - Validate GST account / tax rates / with states / reverse charge.
 # - Add Round-off to Other Value - Pull Request

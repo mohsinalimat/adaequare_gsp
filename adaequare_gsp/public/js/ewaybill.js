@@ -43,6 +43,30 @@ for (let dt of ewaybill_doctype_list) {
                     // }, 'Ewaybill');
                 }
             }) 
+        },
+        before_cancel: function (frm) {
+            if (!frm.doc.allow_cancel) {
+                frappe.validated = false
+                let ewaybill_json = JSON.parse(frm.doc.ewaybill_json)
+                let now = new Date()
+                function warn_before_cancel(msg) {
+                    frappe.warn('Are you sure you want to proceed?',
+                        msg,
+                        () => {
+                            frm.doc.allow_cancel = true
+                            let btn, callback, on_error
+                            frm._cancel(btn, callback, on_error, true)
+                        },
+                        'Cancel Invoice',
+                        true
+                    );
+                }
+                if (adaequare_gsp.get_date(ewaybill_json.ewayBillDate).addHours(24) > now) {
+                    warn_before_cancel("Ewaybill has been created against this Invoice. <b>Cancel the ewaybill before cancelling invoice</b> if you are making changes that will affect you ewaybill.")
+                } else {
+                    warn_before_cancel("Ewaybill has been created against this Invoice and cannot be cancelled. You should not make changes to this invoice that affects ewaybill data.")
+                }   
+            }
         }
     })
 }
