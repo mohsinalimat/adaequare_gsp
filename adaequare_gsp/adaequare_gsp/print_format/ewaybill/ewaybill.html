@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<style>
+    {% include "adaequare_gsp/adaequare_gsp/print_format/ewaybill/ewaybill.css" %}
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 {% set ewb = json.loads(doc.ewaybill_json)%} {% set transType = { 1: "Regular",
 2: "Bill To - Ship To", 3: "Bill From - Dispatch From", 4: "Combination of 2 and
 3"}%}{% set transport_modes = { "1": 'Road', "2": 'Rail', "3": 'Air', "4":
@@ -6,14 +9,14 @@
 <html lang="en">
     <body>
         <div class="pagelayout">
-            <table class="table_css table borderless" border="0">
+            <table
+                class="table_css table borderless"
+                border="0"
+                style="width: 520px; margin: 15px"
+            >
                 <tbody>
                     <tr>
-                        <td
-                            colspan="2"
-                            class="text-center"
-                            style="width: 500px"
-                        >
+                        <td colspan="2" class="text-center">
                             <span class="title_model">
                                 <span>e-Way Bill</span>
                             </span>
@@ -21,18 +24,14 @@
                     </tr>
 
                     <tr>
-                        <td
-                            colspan="2"
-                            class="text-center"
-                            style="width: 500px"
-                        >
+                        <td colspan="2" class="text-center">
                             <div style="height: 2px"></div>
                             <div>
                                 <img
                                     src="data:image/png;base64,{{doc.ewaybill_qr}}"
-                                    width="136"
-                                    height="136"
-                                    style="width: 136 !important"
+                                    width="95"
+                                    height="95"
+                                    style="width: 95 !important"
                                 />
                             </div>
                         </td>
@@ -43,15 +42,15 @@
             <table
                 class="table_css table borderless"
                 border="0"
-                style="width: 700px"
+                style="width: 520px; margin: 15px"
             >
                 <tbody>
                     <tr>
-                        <td style="width: 250px">
+                        <td style="width: 200px">
                             <span>E-Way Bill No:</span>
                         </td>
                         <td>
-                            <span style="font-size: 18px; font-weight: bold">
+                            <span style="font-size: 13px; font-weight: bold">
                                 {{add_spacing(ewb.ewbNo, 4)}}
                             </span>
                         </td>
@@ -229,7 +228,7 @@
                                     class="table table-responsive gvtables"
                                     border="1"
                                     style="
-                                        font-size: 11px;
+                                        font-size: 8px;
                                         border-collapse: collapse;
                                     "
                                 >
