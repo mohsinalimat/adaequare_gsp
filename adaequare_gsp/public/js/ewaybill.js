@@ -82,7 +82,7 @@ adaequare_gsp.reprint_ewaybill = function (frm) {
         },
         callback: function (r) {
             frm.reload_doc()
-            frappe.msgprint(__('Ewaybill Print Generated Successfully.'))
+            frappe.msgprint(__('Ewaybill Print generated successfully and attached here.'))
         }
     })
 }
@@ -196,6 +196,10 @@ adaequare_gsp.dialog_generate_ewaybill = function (frm) {
                 },
                 callback: function (r) {
                     frm.reload_doc()
+                    frappe.show_alert({
+                        message:__('Ewaybill attached here.'),
+                        indicator:'green'
+                    }, 5);
                     if (!r.message) return;
                     frappe.msgprint(__(r.message))
                 }
