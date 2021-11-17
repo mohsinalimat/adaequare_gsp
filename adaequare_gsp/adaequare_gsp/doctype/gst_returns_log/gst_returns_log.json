@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:arn",
+ "autoname": "format:{gstin}-{financial_year}",
  "creation": "2021-10-27 17:22:50.374561",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,17 +9,12 @@
  "field_order": [
   "party_type",
   "gstin",
+  "last_synced_on",
   "column_break_3",
   "party",
-  "return_data_section",
-  "arn",
-  "mode_of_filing",
-  "return_period",
-  "is_valid",
-  "column_break_13",
-  "status",
-  "return_type",
-  "date_of_filling"
+  "financial_year",
+  "returns_section",
+  "returns"
  ],
  "fields": [
   {
@@ -40,60 +35,34 @@
    "label": "GSTIN"
   },
   {
-   "fieldname": "return_data_section",
-   "fieldtype": "Section Break",
-   "label": "Return Data"
-  },
-  {
-   "fieldname": "mode_of_filing",
-   "fieldtype": "Select",
-   "label": "Mode of Filing",
-   "options": "\nONLINE\nOFFLINE"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_valid",
-   "fieldtype": "Check",
-   "label": "Is Valid"
-  },
-  {
-   "fieldname": "date_of_filling",
-   "fieldtype": "Date",
-   "label": "Date of Filling"
-  },
-  {
-   "fieldname": "return_period",
-   "fieldtype": "Data",
-   "label": "Return Period"
-  },
-  {
-   "fieldname": "return_type",
-   "fieldtype": "Data",
-   "label": "Return Type"
-  },
-  {
-   "fieldname": "arn",
-   "fieldtype": "Data",
-   "label": "ARN",
-   "unique": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Data",
-   "label": "Status"
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
+   "fieldname": "financial_year",
+   "fieldtype": "Link",
+   "label": "Financial Year",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "returns_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "returns",
+   "fieldtype": "Table",
+   "label": "Returns",
+   "options": "GST Returns Log Item"
+  },
+  {
+   "fieldname": "last_synced_on",
+   "fieldtype": "Datetime",
+   "label": "Last Synced On"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-29 18:04:52.306727",
+ "modified": "2021-11-16 11:51:01.500359",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "GST Returns Log",

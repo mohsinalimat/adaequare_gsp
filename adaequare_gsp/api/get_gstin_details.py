@@ -2,7 +2,7 @@ import frappe
 from adaequare_gsp.helpers.gstn_public_api import GstnPublicApi
 from adaequare_gsp.adaequare_gsp.doctype.adaequare_settings.adaequare_settings import (
     update_party_gstin_details,
-    get_parties
+    get_parties,
 )
 from erpnext.regional.india.utils import (
     GSTIN_FORMAT,
@@ -48,11 +48,12 @@ def get_party_gstin(customer=None, supplier=None):
         if r.get("gstin") and r.get("gstin")[2:12] == r.get("pan"):
             return r.gstin
 
+
 @frappe.whitelist()
 def update_party(dt, dn):
-    parties = get_parties(dt, {'name': dn}) if dt == 'Customer' else get_parties(dt, {'name': dn})
-    update_party_gstin_details(1, dt, parties)
+    update_party_gstin_details(1, dt, get_parties(dt, {"name": dn}))
     return True
+
 
 @frappe.whitelist()
 def validate_gstin(gstin):

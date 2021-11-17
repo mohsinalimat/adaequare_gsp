@@ -1,10 +1,22 @@
 <style>
     {% include "adaequare_gsp/adaequare_gsp/print_format/ewaybill/ewaybill.css" %}
 </style>
-{% if doc.ewaybill_json and doc.ewaybill %} {% set ewb =
-json.loads(doc.ewaybill_json)%} {% set transType = { 1: "Regular", 2: "Bill To -
-Ship To", 3: "Bill From - Dispatch From", 4: "Combination of 2 and 3"}%}{% set
-transport_modes = { "1": 'Road', "2": 'Rail', "3": 'Air', "4": 'Ship' }%}
+{%
+    if doc.ewaybill_json and doc.ewaybill
+    set ewb = json.loads(doc.ewaybill_json)
+    set transType = {
+        1: "Regular",
+        2: "Bill To - Ship To",
+        3: "Bill From - Dispatch From",
+        4: "Combination of 2 and 3"
+    }
+    set transport_modes = {
+        "1": 'Road',
+        "2": 'Rail',
+        "3": 'Air',
+        "4": 'Ship'
+    }
+%}
 <html lang="en">
     <body>
         <div class="pagelayout">

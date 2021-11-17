@@ -25,7 +25,16 @@ frappe.query_reports["Supplier Compliance"] = {
 			fieldname: 'return_period',
 			label: __('Return Period'),
 			fieldtype: 'Date Range',
-			// TODO: validate date range to be in selected fiscal_year
+			on_change(report) {
+				const { fiscal_year, return_period } = report.get_values();
+				const date_range = report.report_settings.fiscal_years_map[fiscal_year];
+
+				if (date_range && (return_period[0] < date_range[0] || return_period[1] > date_range[1])) {
+					frappe.throw(__(
+						`Return Period should be withing the selected fiscal year ${fiscal_year.bold()}`
+					));
+				}
+			}
 		},
 		{
 			fieldname: 'return_type',
@@ -34,7 +43,6 @@ frappe.query_reports["Supplier Compliance"] = {
 			options: [
 				"GSTR1",
 				"GSTR3B",
-				"GSTR5A",
 				"GSTR9",
 				"GSTR9A",
 				"GSTR9C",
@@ -92,7 +100,6 @@ async function fetch_latest_returns(report) {
 			suppliers: report.data,
 		},
 	});
-	console.log(message);
 }
 
 
