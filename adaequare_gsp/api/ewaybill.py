@@ -151,7 +151,7 @@ def generate_ewaybill(dt, dn, dia):
                 "ewaybill_result": json.dumps(ewaybill_json, indent=4),
             }
         )
-        log.insert()
+        log.insert(ignore_permissions=True)
 
     log_ewaybill()
     generate_ewaybill_pdf(dt, dn, ewaybill)
