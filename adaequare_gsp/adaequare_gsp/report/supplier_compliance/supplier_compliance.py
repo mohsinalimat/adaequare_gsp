@@ -159,7 +159,8 @@ def fetch_latest_returns(financial_year, suppliers):
 
     api = GstnPublicApi()
     start_year, end_year = financial_year.split("-")
-    today = nowdate()
+    current_fy = get_fiscal_year(nowdate())[0]
+    financial_year_end_date = get_fiscal_year(fiscal_year=financial_year)[2]
 
     logs = frappe.db.sql(
         """
@@ -181,14 +182,11 @@ def fetch_latest_returns(financial_year, suppliers):
     for log in logs:
         arn = log.pop("arn")
         if log.name not in existing_logs:
-            existing_logs[log.name] = frappe._dict(returns=[], **log)
+            existing_logs[log.name] = {"returns": [], **log}
 
         existing_logs[log.name]["returns"].append(arn)
 
     counter = frappe._dict(created=0, updated=0, skipped=0, api_calls=0, failed=[])
-    current_fy = get_fiscal_year(today)[0]
-    financial_year_end_date = get_fiscal_year(fiscal_year=financial_year)[2]
-
     for idx, supplier in enumerate(suppliers, 1):
         docname = f"{supplier['gstin']}-{financial_year}"
         log_exists = docname in existing_logs
@@ -255,22 +253,18 @@ def fetch_latest_returns(financial_year, suppliers):
     frappe.msgprint(end_message, title="success", indicator="green")
 
 
-def create_gst_returns_log(
-    fy, supplier, returns, docname, update_existing, existing_arns
-):
+def create_gst_returns_log(fy, supplier, returns, docname, update, existing_arns):
     doctype = "GST Returns Log"
     returns = [
-        frappe._dict(
-            {
-                "arn": log["arn"],
-                "mode_of_filing": log["mof"],
-                "return_period": log["ret_prd"],
-                "is_valid": log.get("valid", "Y") == "Y",
-                "status": log["status"],
-                "return_type": log["rtntype"],
-                "date_of_filling": datetime.strptime(log["dof"], "%d-%m-%Y").date(),
-            }
-        )
+        {
+            "arn": log["arn"],
+            "mode_of_filing": log["mof"],
+            "return_period": log["ret_prd"],
+            "is_valid": log.get("valid", "Y") == "Y",
+            "status": log["status"],
+            "return_type": log["rtntype"],
+            "date_of_filling": datetime.strptime(log["dof"], "%d-%m-%Y").date(),
+        }
         for log in returns
         if log["arn"] not in existing_arns
     ]
@@ -280,7 +274,7 @@ def create_gst_returns_log(
 
     doc = (
         frappe.get_doc(doctype, docname)
-        if update_existing
+        if update
         else frappe.get_doc(
             {
                 "doctype": doctype,
