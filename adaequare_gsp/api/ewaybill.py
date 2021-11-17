@@ -16,10 +16,12 @@ DATE_FORMAT = "%d/%m/%Y %I:%M:%S %p"
 
 def log_ewaybill(dt, dn, values, log_values):
     frappe.db.set_value(dt, dn, values)
-
-    doc = frappe.get_doc({"doctype": "Ewaybill Log", **log_values})
-    doc.flags.ignore_permissions = True
-    doc.save()
+    if "name" in log_values:
+        doc = frappe.get_doc("Ewaybill Log", log_values.pop("name"))
+    else:
+        doc = frappe.get_doc({"doctype": "Ewaybill Log"})
+    doc.update(log_values)
+    doc.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
@@ -121,7 +123,7 @@ def update_vehicle_info(dt, dn, dia):
     dispatch_address = (
         inv_doc.dispatch_address_name
         if inv_doc.dispatch_address_name
-        e   lse inv_doc.company_address
+        else inv_doc.company_address
     )
     dispatch_address = frappe.get_doc("Address", dispatch_address)
 
@@ -148,9 +150,6 @@ def update_vehicle_info(dt, dn, dia):
 
     progress.percent = 66
     publish_progress(**progress)
-    dt_values =
-    log_ewaybill(dt, dn, dt_values, log_values)
-
 
     def log_ewaybill():
         frappe.db.set_value(
