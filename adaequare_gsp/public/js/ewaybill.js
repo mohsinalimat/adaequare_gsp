@@ -5,7 +5,7 @@ for (let dt of ewaybill_doctype_list) {
         refresh: function (frm) {
             frappe.model.get_value('Adaequare Settings', 'Adaequare Settings', 'gstn_ewb_api',
             function (d) {
-                if (d.gstn_ewb_api == 0) return;
+                if (d.gstn_ewb_api == 0 || !frappe.perm.has_perm(frm.doctype, 0, 'submit', frm.doc.name)) return;
                 if (!frm.doc.ewaybill && frm.doc.docstatus == 1) {
                     frm.add_custom_button('Generate Ewaybill', () => {
                         adaequare_gsp.dialog_generate_ewaybill(frm)
@@ -45,7 +45,7 @@ for (let dt of ewaybill_doctype_list) {
             }) 
         },
         before_cancel: function (frm) {
-            if (!frm.doc.allow_cancel) {
+            if (!frm.doc.allow_cancel && frm.doc.ewaybill_json) {
                 frappe.validated = false
                 let ewaybill_json = JSON.parse(frm.doc.ewaybill_json)
                 let now = new Date()

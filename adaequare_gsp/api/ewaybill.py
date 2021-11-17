@@ -193,6 +193,8 @@ def cancel_ewaybill(dt, dn, dia):
             {
                 "ewaybill": None,
                 "eway_bill_validity": None,
+                "ewaybill_json": None,
+                "ewaybill_qr": None,
             },
         )
         frappe.db.set_value(
@@ -427,6 +429,13 @@ def delete_ewaybill_pdf(dt, dn, ewaybill):
 # Pending Things
 
 # - Validate GST account / tax rates / with states / reverse charge.
+# Check Bill from State and Ship from state.
+# Add default in settings if address is not available
+# Check if overseas / SEZ
+# Check if Intra state then amount matches.
+# Check rates of taxes
+
+
 # - Add Round-off to Other Value - Pull Request
 # - Add Bill-From and Ship from along with Both, based on Dispatch Address
 # additional validations in erpnext PR

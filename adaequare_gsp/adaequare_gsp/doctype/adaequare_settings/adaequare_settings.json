@@ -139,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-02 08:21:59.043534",
+ "modified": "2021-11-17 06:39:05.509651",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Adaequare Settings",
@@ -154,6 +154,20 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "sort_field": "modified",
