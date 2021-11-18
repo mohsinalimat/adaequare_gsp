@@ -4,5 +4,6 @@
 # import frappe
 import unittest
 
+
 class TestAdaequareSettings(unittest.TestCase):
-	pass
+    pass

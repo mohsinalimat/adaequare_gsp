@@ -14,6 +14,9 @@ class GstnPublicApi(AuthApi):
         return frappe._dict(response)
 
     def get_returns_info(self, gstin, fy):
+        if len(fy) == 9:
+            start, end = fy.split("-")
+            fy = f"{start}-{end[-2:]}"
         response = self.make_request(
             method="get", action="RETTRACK", gstin=gstin, fy=fy, url_suffix="returns?"
         )

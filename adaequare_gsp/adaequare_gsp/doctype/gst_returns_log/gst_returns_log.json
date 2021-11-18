@@ -1,86 +1,86 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "format:{gstin}-{financial_year}",
- "creation": "2021-10-27 17:22:50.374561",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "party_type",
-  "gstin",
-  "last_synced_on",
-  "column_break_3",
-  "party",
-  "financial_year",
-  "returns_section",
-  "returns"
- ],
- "fields": [
-  {
-   "fieldname": "party_type",
-   "fieldtype": "Link",
-   "label": "Party Type",
-   "options": "DocType"
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Dynamic Link",
-   "label": "Party",
-   "options": "party_type"
-  },
-  {
-   "fieldname": "gstin",
-   "fieldtype": "Data",
-   "label": "GSTIN"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "financial_year",
-   "fieldtype": "Link",
-   "label": "Financial Year",
-   "options": "Fiscal Year"
-  },
-  {
-   "fieldname": "returns_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "returns",
-   "fieldtype": "Table",
-   "label": "Returns",
-   "options": "GST Returns Log Item"
-  },
-  {
-   "fieldname": "last_synced_on",
-   "fieldtype": "Datetime",
-   "label": "Last Synced On"
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-11-16 11:51:01.500359",
- "modified_by": "Administrator",
- "module": "Adaequare Gsp",
- "name": "GST Returns Log",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC"
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "format:{gstin}-{financial_year}",
+  "creation": "2021-10-27 17:22:50.374561",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "party_type",
+    "gstin",
+    "last_synced_on",
+    "column_break_3",
+    "party",
+    "financial_year",
+    "returns_section",
+    "returns"
+  ],
+  "fields": [
+    {
+      "fieldname": "party_type",
+      "fieldtype": "Link",
+      "label": "Party Type",
+      "options": "DocType"
+    },
+    {
+      "fieldname": "party",
+      "fieldtype": "Dynamic Link",
+      "label": "Party",
+      "options": "party_type"
+    },
+    {
+      "fieldname": "gstin",
+      "fieldtype": "Data",
+      "label": "GSTIN"
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "financial_year",
+      "fieldtype": "Link",
+      "label": "Financial Year",
+      "options": "Fiscal Year"
+    },
+    {
+      "fieldname": "returns_section",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "returns",
+      "fieldtype": "Table",
+      "label": "Returns",
+      "options": "GST Returns Log Item"
+    },
+    {
+      "fieldname": "last_synced_on",
+      "fieldtype": "Datetime",
+      "label": "Last Synced On"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2021-11-16 11:51:01.500359",
+  "modified_by": "Administrator",
+  "module": "Adaequare Gsp",
+  "name": "GST Returns Log",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC"
 }

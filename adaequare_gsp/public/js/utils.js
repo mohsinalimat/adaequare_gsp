@@ -1,4 +1,4 @@
-frappe.provide("modifyMethod");
+frappe.provide('modifyMethod');
 
 modifyMethod = function (source, funcName, newFunc, before = false) {
   let sourceObj = eval(source);
@@ -21,7 +21,7 @@ modifyMethod = function (source, funcName, newFunc, before = false) {
   function newFunction() {
     if (before) {
       let msg = newFunc.apply(this, arguments);
-      if (msg === "return") {
+      if (msg === 'return') {
         return;
       }
     }
@@ -33,7 +33,7 @@ modifyMethod = function (source, funcName, newFunc, before = false) {
       let execNewFunc = () => {
         return newFunc.call(this, ...Array.from(arguments), out);
       };
-      if (typeof out === "object" && out.then) {
+      if (typeof out === 'object' && out.then) {
         return out.then(execNewFunc);
       } else {
         new_out = execNewFunc();

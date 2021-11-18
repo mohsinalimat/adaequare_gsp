@@ -72,6 +72,7 @@ def validate_party(self, method=None):
         if PAN_NUMBER_FORMAT.match(pan):
             self.pan = pan
 
+
 def validate_address(self, method=None):
     if self.get("gstin_custom"):
         self.gstin = self.gstin_custom
@@ -85,15 +86,16 @@ def validate_address(self, method=None):
 
     if self.get("customer"):
         self.address_title = self.get("customer")
-        self.append("links", {
-            "link_doctype": "Customer", "link_name": self.get("customer")
-        })
+        self.append(
+            "links", {"link_doctype": "Customer", "link_name": self.get("customer")}
+        )
 
     if self.get("supplier"):
         self.address_title = self.get("supplier")
-        self.append("links", {
-            "link_doctype": "Supplier", "link_name": self.get("supplier")
-        })
+        self.append(
+            "links", {"link_doctype": "Supplier", "link_name": self.get("supplier")}
+        )
+
 
 def get_gst_category(self):
     if self.get("gstin_info"):
@@ -105,4 +107,3 @@ def get_gst_category(self):
 
     self.gstin_info = json.dumps(self.get("gstin_info"))
     return gst_category
-        
