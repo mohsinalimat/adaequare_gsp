@@ -13,13 +13,11 @@ frappe.query_reports['Supplier Compliance'] = {
         const { fiscal_year } = report.get_values();
         if (!fiscal_year) return;
 
-        const return_period =
-          report.report_settings.fiscal_years_map[fiscal_year];
-        const today = frappe.datetime.get_today();
-        if (return_period[1] > today) {
-          return_period[1] = today;
-        }
-        report.set_filter_value('return_period', return_period);
+        await set_return_period(
+          report,
+          report.report_settings.fiscal_years_map[fiscal_year]
+        );
+        report.refresh();
       }
     },
     {
@@ -86,10 +84,7 @@ frappe.query_reports['Supplier Compliance'] = {
   },
   set_defaults(report) {
     report.set_filter_value('fiscal_year', this.default_fiscal_year);
-    report.set_filter_value(
-      'return_period',
-      this.fiscal_years_map[this.default_fiscal_year]
-    );
+    set_return_period(report, this.fiscal_years_map[this.default_fiscal_year]);
   }
 };
 async function fetch_latest_returns(report) {
@@ -97,8 +92,14 @@ async function fetch_latest_returns(report) {
     method:
       'adaequare_gsp.adaequare_gsp.report.supplier_compliance.supplier_compliance.fetch_latest_returns',
     args: {
-      financial_year: report.get_filter_value('fiscal_year'),
+      fy: report.get_filter_value('fiscal_year'),
       suppliers: report.data
     }
   });
+}
+
+function set_return_period(report, return_period) {
+  const today = frappe.datetime.get_today();
+  if (return_period[1] > today) return_period[1] = today;
+  report.set_filter_value('return_period', return_period);
 }

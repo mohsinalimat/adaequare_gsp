@@ -1,14 +1,13 @@
 # Copyright (c) 2013, Resilient Tech and contributors
 # For license information, please see license.txt
 
-from collections import defaultdict
 from datetime import datetime
 import json
 
 import frappe
 from frappe import _
 from frappe.utils import getdate
-from frappe.utils import add_months, nowdate
+from frappe.utils import add_months
 from frappe.utils.data import add_days, now_datetime
 from six import string_types
 
@@ -108,6 +107,9 @@ def get_suppliers(filters):
 
 
 def update_returns(filters, data):
+    if not data:
+        return data
+
     logs = frappe.db.sql(
         """
             SELECT log.gstin, child.return_period
@@ -120,21 +122,21 @@ def update_returns(filters, data):
             ", ".join(frappe.db.escape(supplier["gstin"]) for supplier in data)
         ),
         as_dict=True,
-        values=[filters.return_type],
-        explain=True,
+        values=filters.return_type,
     )
 
-    filed_returns = defaultdict(list)
+    filed_returns = {}
     for log in logs:
+        if log.gstin not in filed_returns:
+            filed_returns[log.gstin] = []
         filed_returns[log.gstin].append(log.return_period)
 
     for row in data:
-        filed_months = filed_returns[row["gstin"]]
+        filed_months = filed_returns.get(row["gstin"], [])
         latest_filed_month = max(
             (datetime.strptime(month, "%m%Y").date() for month in filed_months),
             default=datetime.min.date(),
         )
-
         for fieldname, month in get_months(filters.get("return_period", []), True):
             if fieldname in filed_months:
                 row[fieldname] = "✅"
@@ -147,89 +149,104 @@ def update_returns(filters, data):
 
 
 @frappe.whitelist()
-def fetch_latest_returns(financial_year, suppliers):
+def fetch_latest_returns(fy, suppliers):
     if isinstance(suppliers, string_types):
         suppliers = json.loads(suppliers)
 
-    suppliers = suppliers[:50]
+    suppliers = suppliers[:10]
 
     progress_title = "Loading"
     suppliers_count = len(suppliers)
     show_progress(progress_title, 0, suppliers_count)
 
     api = GstnPublicApi()
-    start_year, end_year = financial_year.split("-")
-    current_fy = get_fiscal_year(nowdate())[0]
-    financial_year_end_date = get_fiscal_year(fiscal_year=financial_year)[2]
+    current_fy = get_fiscal_year(now_datetime())[0]
+    fy_end_date = get_fiscal_year(fiscal_year=fy)[2]
+    next_fy = add_fiscal_year(fy, 1)
+
+    logs_name = []
+    for supplier in suppliers:
+        logs_name.append(f"{supplier['gstin']}-{fy}")
+        # Fetch for next fy
+        if fy != current_fy and supplier.get(f"03{fy_end_date.year}") != "✅":
+            logs_name.append(f"{supplier['gstin']}-{next_fy}")
 
     logs = frappe.db.sql(
         """
         SELECT log.name, log.last_synced_on, log.gstin, child.arn
         FROM `tabGST Returns Log` log
-        INNER JOIN `tabGST Returns Log Item` child
+        LEFT JOIN `tabGST Returns Log Item` child
         ON child.parent = log.name
         WHERE log.name in ({0})
     """.format(
-            ", ".join(
-                frappe.db.escape(f"{supplier['gstin']}-{financial_year}")
-                for supplier in suppliers
-            )
+            ", ".join(map(frappe.db.escape, logs_name))
         ),
         as_dict=True,
+        debug=True,
     )
-
+    print(logs)
     existing_logs = frappe._dict()
     for log in logs:
         arn = log.pop("arn")
         if log.name not in existing_logs:
             existing_logs[log.name] = {"returns": [], **log}
+        if arn:
+            existing_logs[log.name]["returns"].append(arn)
 
-        existing_logs[log.name]["returns"].append(arn)
-
+    print(existing_logs)
     counter = frappe._dict(created=0, updated=0, skipped=0, api_calls=0, failed=[])
     for idx, supplier in enumerate(suppliers, 1):
-        docname = f"{supplier['gstin']}-{financial_year}"
+        docname = f"{supplier['gstin']}-{fy}"
         log_exists = docname in existing_logs
 
         progress_msg = "Fetching returns for {} ({}/{})...".format(
             supplier["supplier"], idx, suppliers_count
         )
         show_progress(progress_title, idx, suppliers_count, progress_msg)
-
-        counter_update_key = "created"
-        if log_exists:
-            counter_update_key = "updated"
-            last_synced_on = existing_logs[docname].last_synced_on
-            # TODO: get this value from Adaequare settings
-            dont_update_days = 10
-            if (
-                financial_year != current_fy
-                and last_synced_on.date() > financial_year_end_date
-            ) or last_synced_on > add_days(now_datetime(), -dont_update_days):
-                counter.skipped += 1
-                continue
-
         try:
-            counter.api_calls += 1
+            if fy != current_fy and supplier.get(f"03{fy_end_date.year}") != "✅":
+                next_year_docname = f"{supplier['gstin']}-{next_fy}"
 
-            response = api.get_returns_info(
-                supplier["gstin"], start_year + "-" + end_year[-2:]
-            )
-            create_gst_returns_log(
-                financial_year,
+                counter.api_calls += 1
+                print("Next Year API called for", supplier["supplier"])
+                response = api.get_returns_info(supplier["gstin"], next_fy)
+                if create_gst_returns_log(
+                    next_fy,
+                    supplier,
+                    response.get("EFiledlist", []),
+                    next_year_docname,
+                    existing_logs.get(next_year_docname, {}).get("returns", []),
+                ):
+                    counter.created += 1
+
+            counter_update_key = "created"
+            if log_exists:
+                counter_update_key = "updated"
+                last_synced_on = existing_logs[docname]["last_synced_on"]
+                # TODO: get this value from Adaequare settings
+                dont_update_days = 10
+                if (
+                    fy != current_fy and last_synced_on.date() > fy_end_date
+                ) or last_synced_on > add_days(now_datetime(), -dont_update_days):
+                    counter.skipped += 1
+                    continue
+
+            counter.api_calls += 1
+            response = api.get_returns_info(supplier["gstin"], fy)
+            if create_gst_returns_log(
+                fy,
                 supplier,
                 response.get("EFiledlist", []),
                 docname,
-                log_exists,
                 existing_logs.get(docname, {}).get("returns", []),
-            )
-
-            counter[counter_update_key] += 1
+                log_exists,
+            ):
+                counter[counter_update_key] += 1
 
         except Exception as e:
+            frappe.clear_last_message()
             print("Unexpected error:", e)
             counter.failed.append(frappe._dict(supplier=supplier, error=e))
-            frappe.clear_last_message()
             continue
 
     hide_progress(timeout=False)
@@ -253,7 +270,8 @@ def fetch_latest_returns(financial_year, suppliers):
     frappe.msgprint(end_message, title="success", indicator="green")
 
 
-def create_gst_returns_log(fy, supplier, returns, docname, update, existing_arns):
+def create_gst_returns_log(fy, supplier, returns, docname, existing_arns, update=None):
+    print("creating return log for", supplier, fy)
     doctype = "GST Returns Log"
     returns = [
         {
@@ -272,6 +290,9 @@ def create_gst_returns_log(fy, supplier, returns, docname, update, existing_arns
     if not returns:
         return
 
+    if update is None:
+        update = frappe.db.exists(doctype, docname)
+
     doc = (
         frappe.get_doc(doctype, docname)
         if update
@@ -287,5 +308,9 @@ def create_gst_returns_log(fy, supplier, returns, docname, update, existing_arns
         )
     )
     doc.extend("returns", returns)
-    doc.flags.ignore_permissions = True
-    doc.save()
+    return doc.save(ignore_permissions=True)
+
+
+def add_fiscal_year(fy, years):
+    start, end = fy.split("-")
+    return f"{int(start) + years}-{int(end) + years}"
