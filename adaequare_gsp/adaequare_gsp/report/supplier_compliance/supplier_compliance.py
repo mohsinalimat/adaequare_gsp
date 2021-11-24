@@ -153,8 +153,6 @@ def fetch_latest_returns(fy, suppliers):
     if isinstance(suppliers, string_types):
         suppliers = json.loads(suppliers)
 
-    suppliers = suppliers[:10]
-
     progress_title = "Loading"
     suppliers_count = len(suppliers)
     show_progress(progress_title, 0, suppliers_count)
