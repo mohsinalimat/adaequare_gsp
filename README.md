@@ -1,6 +1,6 @@
-## Adaequare Gsp
+## Adaequare GST
 
-API's for India GST, integration with ERPNext
+APIs to integrate ERPNext with GST Suvidha Providers
 
 #### License
 
