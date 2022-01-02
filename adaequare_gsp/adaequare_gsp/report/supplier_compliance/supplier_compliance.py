@@ -182,7 +182,6 @@ def fetch_latest_returns(fy, suppliers):
         as_dict=True,
         debug=True,
     )
-    print(logs)
     existing_logs = frappe._dict()
     for log in logs:
         arn = log.pop("arn")
@@ -191,7 +190,6 @@ def fetch_latest_returns(fy, suppliers):
         if arn:
             existing_logs[log.name]["returns"].append(arn)
 
-    print(existing_logs)
     counter = frappe._dict(created=0, updated=0, skipped=0, api_calls=0, failed=[])
     for idx, supplier in enumerate(suppliers, 1):
         docname = f"{supplier['gstin']}-{fy}"
@@ -206,7 +204,6 @@ def fetch_latest_returns(fy, suppliers):
                 next_year_docname = f"{supplier['gstin']}-{next_fy}"
 
                 counter.api_calls += 1
-                print("Next Year API called for", supplier["supplier"])
                 response = api.get_returns_info(supplier["gstin"], next_fy)
                 if create_gst_returns_log(
                     next_fy,
