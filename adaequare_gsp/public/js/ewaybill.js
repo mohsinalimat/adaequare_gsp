@@ -119,7 +119,8 @@ adaequare_gsp.reprint_ewaybill = function (frm) {
     args: {
       dt: frm.doc.doctype,
       dn: frm.doc.name,
-      ewaybill: frm.doc.ewaybill
+      ewaybill: frm.doc.ewaybill,
+      company_gstin: frm.doc.company_gstin,
     },
     callback: function (r) {
       frm.reload_doc();
@@ -240,7 +241,8 @@ adaequare_gsp.dialog_generate_ewaybill = function (frm) {
         args: {
           dt: frm.doc.doctype,
           dn: frm.doc.name,
-          dia: values
+          dia: values,
+          company_gstin: frm.doc.company_gstin,
         },
         callback: function (r) {
           frm.reload_doc();
@@ -301,7 +303,8 @@ adaequare_gsp.dialog_cancel_ewaybill = function (frm) {
         args: {
           dt: frm.doc.doctype,
           dn: frm.doc.name,
-          dia: values
+          dia: values,
+          company_gstin: frm.doc.company_gstin,
         },
         callback: function (r) {
           frm.reload_doc();
@@ -396,7 +399,8 @@ adaequare_gsp.dialog_update_vehicle_info = function (frm) {
         args: {
           dt: frm.doc.doctype,
           dn: frm.doc.name,
-          dia: values
+          dia: values,
+          company_gstin: frm.doc.company_gstin,
         },
         callback: function (r) {
           frm.reload_doc();
@@ -459,7 +463,8 @@ adaequare_gsp.dialog_update_transporter = function (frm) {
         args: {
           dt: frm.doc.doctype,
           dn: frm.doc.name,
-          dia: values
+          dia: values,
+          company_gstin: frm.doc.company_gstin,
         },
         callback: function (r) {
           frm.reload_doc();

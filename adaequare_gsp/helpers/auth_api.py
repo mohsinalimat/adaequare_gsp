@@ -93,9 +93,9 @@ class AuthApi:
             headers.update(
                 {
                     "requestid": self.generate_request_id(),
-                    "gstin": self.settings.gstin,
-                    "username": self.settings.username,
-                    "password": self.settings.get_password("password"),
+                    "gstin": self.comp_gstin,
+                    "username": self.username,
+                    "password": self.password,
                 }
             )
 

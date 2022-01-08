@@ -1,7 +1,6 @@
 # Copyright (c) 2021, Resilient Tech and contributors
 # For license information, please see license.txt
 
-# import frappe
 import frappe
 import json
 from frappe.model.document import Document
@@ -11,7 +10,17 @@ from adaequare_gsp.monkey_patches.create_party import gst_category_map
 
 
 class AdaequareSettings(Document):
-    pass
+    def validate(self):
+        self.validate_credentials()
+    
+    def validate_credentials(self):
+        creds_list = []
+        for creds in self.gst_credentials:
+            creds_id = f"{creds.service}-{creds.gstin}"
+            if creds_id in creds_list:
+                frappe.throw("GST credentials should be unique for Service - GSTIN combination. Kindly remove duplicate credentials", title="Duplicate GST Credentials")
+
+            creds_list.append(f"{creds.service}-{creds.gstin}")
 
 
 @frappe.whitelist()

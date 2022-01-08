@@ -1,182 +1,165 @@
 {
-  "actions": [],
-  "creation": "2021-09-28 17:26:53.017784",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "gspappid",
-    "sandbox",
-    "column_break_1",
-    "gspappsecret",
-    "section_break_3",
-    "gstn_public_api",
-    "column_break_4",
-    "gstn_ewb_api",
-    "section_break_1",
-    "username",
-    "gstin",
-    "column_break_2",
-    "password",
-    "section_break_4",
-    "update_party_info",
-    "column_break_16",
-    "mark_unregistered",
-    "section_break_2",
-    "access_token",
-    "column_break_3",
-    "expires_at",
-    "supplier_compliance_report_settings_section"
-  ],
-  "fields": [
-    {
-      "fieldname": "gspappid",
-      "fieldtype": "Data",
-      "label": "GSP App ID"
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "gspappsecret",
-      "fieldtype": "Password",
-      "label": "GSP App Secret"
-    },
-    {
-      "fieldname": "access_token",
-      "fieldtype": "Small Text",
-      "label": "Access Token"
-    },
-    {
-      "fieldname": "expires_at",
-      "fieldtype": "Datetime",
-      "label": "Expires At"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "depends_on": "eval: doc.gstn_ewb_api == 1",
-      "fieldname": "section_break_1",
-      "fieldtype": "Section Break",
-      "label": "EwayBill / E-Invoice Credentials"
-    },
-    {
-      "fieldname": "username",
-      "fieldtype": "Data",
-      "label": "Username"
-    },
-    {
-      "fieldname": "password",
-      "fieldtype": "Password",
-      "label": "Password"
-    },
-    {
-      "fieldname": "section_break_2",
-      "fieldtype": "Section Break",
-      "hidden": 1
-    },
-    {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    },
-    {
-      "default": "0",
-      "fieldname": "sandbox",
-      "fieldtype": "Check",
-      "label": "Sandbox"
-    },
-    {
-      "fieldname": "gstin",
-      "fieldtype": "Data",
-      "label": "GSTIN"
-    },
-    {
-      "default": "0",
-      "fieldname": "gstn_public_api",
-      "fieldtype": "Check",
-      "label": "Enable GSTN Public API"
-    },
-    {
-      "fieldname": "column_break_4",
-      "fieldtype": "Column Break"
-    },
-    {
-      "default": "0",
-      "fieldname": "gstn_ewb_api",
-      "fieldtype": "Check",
-      "label": "Enable GSTN Eway Bill API"
-    },
-    {
-      "fieldname": "section_break_3",
-      "fieldtype": "Section Break"
-    },
-    {
-      "depends_on": "eval: doc.gstn_public_api",
-      "fieldname": "section_break_4",
-      "fieldtype": "Section Break",
-      "label": "Bulk Update"
-    },
-    {
-      "description": "This will update all GST related information including PAN for all parties. This will not update address or party names.",
-      "fieldname": "update_party_info",
-      "fieldtype": "Button",
-      "label": "Update Party Info"
-    },
-    {
-      "fieldname": "column_break_16",
-      "fieldtype": "Column Break"
-    },
-    {
-      "default": "0",
-      "description": "This will mark all address without GSTIN as URP and set GST Category as Unregistered.",
-      "fieldname": "mark_unregistered",
-      "fieldtype": "Check",
-      "label": "Mark address without GSTIN as Unregistered"
-    },
-    {
-      "fieldname": "supplier_compliance_report_settings_section",
-      "fieldtype": "Section Break",
-      "label": "Supplier Compliance Report Settings "
-    }
-  ],
-  "index_web_pages_for_search": 1,
-  "issingle": 1,
-  "links": [],
-  "modified": "2021-11-17 13:11:48.002177",
-  "modified_by": "Administrator",
-  "module": "Adaequare Gsp",
-  "name": "Adaequare Settings",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "print": 1,
-      "read": 1,
-      "role": "System Manager",
-      "share": 1,
-      "write": 1
-    },
-    {
-      "email": 1,
-      "print": 1,
-      "read": 1,
-      "role": "Accounts Manager",
-      "share": 1
-    },
-    {
-      "email": 1,
-      "print": 1,
-      "read": 1,
-      "role": "Accounts User",
-      "share": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+ "actions": [],
+ "creation": "2021-09-28 17:26:53.017784",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "gspappid",
+  "sandbox",
+  "column_break_1",
+  "gspappsecret",
+  "section_break_3",
+  "gstn_public_api",
+  "column_break_4",
+  "gstn_ewb_api",
+  "section_break_1",
+  "gst_credentials",
+  "section_break_4",
+  "update_party_info",
+  "column_break_16",
+  "mark_unregistered",
+  "section_break_2",
+  "access_token",
+  "column_break_3",
+  "expires_at",
+  "supplier_compliance_report_settings_section"
+ ],
+ "fields": [
+  {
+   "fieldname": "gspappid",
+   "fieldtype": "Data",
+   "label": "GSP App ID"
+  },
+  {
+   "fieldname": "gspappsecret",
+   "fieldtype": "Password",
+   "label": "GSP App Secret"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Small Text",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "label": "Expires At"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "GST Credentials"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox"
+  },
+  {
+   "default": "0",
+   "fieldname": "gstn_public_api",
+   "fieldtype": "Check",
+   "label": "Enable GSTN Public API"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "gstn_ewb_api",
+   "fieldtype": "Check",
+   "label": "Enable GSTN Eway Bill API"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: doc.gstn_public_api",
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Bulk Update"
+  },
+  {
+   "description": "This will update all GST related information including PAN for all parties. This will not update address or party names.",
+   "fieldname": "update_party_info",
+   "fieldtype": "Button",
+   "label": "Update Party Info"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "This will mark all address without GSTIN as URP and set GST Category as Unregistered.",
+   "fieldname": "mark_unregistered",
+   "fieldtype": "Check",
+   "label": "Mark address without GSTIN as Unregistered"
+  },
+  {
+   "fieldname": "supplier_compliance_report_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Compliance Report Settings "
+  },
+  {
+   "fieldname": "gst_credentials",
+   "fieldtype": "Table",
+   "label": "GST Credentials",
+   "options": "GST Credentials"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-01-08 13:32:38.064065",
+ "modified_by": "Administrator",
+ "module": "Adaequare Gsp",
+ "name": "Adaequare Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }
