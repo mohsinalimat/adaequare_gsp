@@ -6,18 +6,32 @@ class GstnPublicApi(AuthApi):
     def __init__(self):
         super().__init__()
         self.api_name = "enriched/commonapi/"
+        self.comp_gstin = self.settings.gst_credentials[0].gstin
 
-    def get_gstin_info(self, gstin):
+    def get_params(self, action, gstin, fy=None):
+        return {
+            "action": action,
+            "gstin": gstin,
+            "fy": fy,
+        }
+
+    def get_headers(self):
+        return {"Authorization": self.settings.access_token, "gstin": self.comp_gstin}
+
+    def make_get_request(self, urlsuffix, *args, **kwargs):
         response = self.make_request(
-            method="get", action="TP", gstin=gstin, url_suffix="search?"
+            method="get",
+            url_suffix=urlsuffix,
+            params=self.get_params(*args, **kwargs),
+            headers=self.get_headers(),
         )
         return frappe._dict(response)
+
+    def get_gstin_info(self, gstin):
+        return self.make_get_request("search?", "TP", gstin)
 
     def get_returns_info(self, gstin, fy):
         if len(fy) == 9:
             start, end = fy.split("-")
             fy = f"{start}-{end[-2:]}"
-        response = self.make_request(
-            method="get", action="RETTRACK", gstin=gstin, fy=fy, url_suffix="returns?"
-        )
-        return frappe._dict(response)
+        return self.make_get_request("returns?", "RETTRACK", gstin, fy=fy)

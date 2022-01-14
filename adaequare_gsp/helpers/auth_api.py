@@ -75,31 +75,15 @@ class AuthApi:
             frappe.throw(error_des)
 
     def make_request(
-        self, method, action=None, gstin=None, ewbNo=None, fy="", url_suffix="", data=""
+        self,
+        method,
+        url_suffix,
+        params,
+        headers,
+        data=None,
     ):
         if method not in ("get", "post"):
             frappe.throw("Invalid method", method.upper())
-
-        headers = {"Authorization": self.settings.access_token}
-
-        params = {
-            "action": action,
-            "gstin": gstin,
-            "fy": fy,
-        }
-
-        # additional headers and parms for ewayapi
-        if "ewayapi" in url_suffix:
-            headers.update(
-                {
-                    "requestid": self.generate_request_id(),
-                    "gstin": self.comp_gstin,
-                    "username": self.username,
-                    "password": self.password,
-                }
-            )
-
-            params["ewbNo"] = ewbNo
 
         # api calls
         url = self.BASE_URL + self.test_url + self.api_name + url_suffix

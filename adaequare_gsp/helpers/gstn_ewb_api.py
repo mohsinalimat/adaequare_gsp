@@ -15,18 +15,33 @@ class GstnEwbApi(AuthApi):
                 self.username = creds.username
                 self.password = creds.get_password("password")
                 break
-        
+
         # sandbox
         if self.settings.sandbox:
             self.comp_gstin = self.username = "05AAACG2115R1ZN"
             self.password = "abc123@@"
-        
+
         if not self.username:
-            frappe.throw("You have not set credentials in Adequare Settings. Kindly set your EwayBill credentials to use API service.", title="Credentials unavailable")
+            frappe.throw(
+                "You have not set credentials in Adequare Settings. Kindly set your EwayBill credentials to use API service.",
+                title="Credentials unavailable",
+            )
+
+    def get_headers(self):
+        return {
+            "requestid": self.generate_request_id(),
+            "gstin": self.comp_gstin,
+            "username": self.username,
+            "password": self.password,
+            "Authorization": self.settings.access_token,
+        }
 
     def get_ewaybill(self, ewbNo):
         response = self.make_request(
-            method="get", ewbNo=ewbNo, url_suffix="ewayapi/GetEwayBill?"
+            method="get",
+            url_suffix="ewayapi/GetEwayBill?",
+            params={"ewbNo": ewbNo},
+            headers=self.get_headers(),
         )
         return frappe._dict(response)
 
@@ -34,7 +49,11 @@ class GstnEwbApi(AuthApi):
     def make_post_request(self, action, data):
         data = json.dumps(data)
         response = self.make_request(
-            method="post", action=action, url_suffix=self.url_suffix, data=data
+            method="post",
+            url_suffix=self.url_suffix,
+            params={"action": action},
+            headers=self.get_headers(),
+            data=data,
         )
         return frappe._dict(response)
 
