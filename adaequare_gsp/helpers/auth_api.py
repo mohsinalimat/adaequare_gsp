@@ -93,6 +93,12 @@ class AuthApi:
             response = api.post(url, params=params, headers=headers, data=data).json()
 
         result = response.get("result")
+        if not result and (
+            response.get("errorCode") == "RETOTPREQUEST"
+            or response.get("success") != "false"
+        ):
+            result = response
+
         self.log_response(
             **{
                 ("response" if result else "error"): response,

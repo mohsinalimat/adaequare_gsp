@@ -1,9 +1,10 @@
 {
-  "js/adaequare_gsp.min.js": [
-    "public/js/utils.js",
-    "public/js/common.js",
-    "public/js/create_party.js",
-    "public/js/party.js",
-    "public/js/ewaybill.js"
-  ]
+    "js/adaequare_gsp.min.js": [
+        "public/js/utils.js",
+        "public/js/common.js",
+        "public/js/create_party.js",
+        "public/js/party.js",
+        "public/js/ewaybill.js",
+        "public/js/get_gstin_otp.js"
+    ]
 }
