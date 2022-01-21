@@ -5,16 +5,15 @@ from adaequare_gsp.helpers.auth_api import AuthApi
 
 
 class GstnReturnsApi(AuthApi):
-    def __init__(self, company_gstin, doctype, docname):
+    def __init__(self, company_gstin):
         super().__init__()
         self.uid = frappe.utils.random_string(7)
-        self.doctype = doctype
-        self.docname = docname
         self.api_name = "enriched/returns"
         self.comp_gstin = company_gstin
         for creds in self.settings.gst_credentials:
             if creds.gstin == company_gstin and creds.service == "Returns":
                 self.username = creds.username
+                self.company = creds.company
                 break
 
         # sandbox
@@ -47,20 +46,20 @@ class GstnReturnsApi(AuthApi):
             "Authorization": self.settings.access_token,
         }
 
-
-class Gstr2Api(GstnReturnsApi):
-    def __init__(self, *args):
-        super().__init__(*args)
-        self.url_suffix = "/gstr2b?"
-
-    def make_get_request(self, action, ret_period, otp, url_suffix=None):
+    def make_get_request(self, action, ret_period, otp):
         response = self.make_request(
             method="get",
-            url_suffix=url_suffix if url_suffix else self.url_suffix,
+            url_suffix=self.url_suffix,
             params=self.get_params(action, ret_period),
             headers=self.get_headers(ret_period, otp),
         )
         return frappe._dict(response)
 
-    def get_gstr2b(self, ret_period, otp=None):
+
+class Gstr2bApi(GstnReturnsApi):
+    def __init__(self, company_gstin):
+        super().__init__(company_gstin)
+        self.url_suffix = "/gstr2b?"
+
+    def get_gstr_2b(self, ret_period, otp):
         return self.make_get_request("GET2B", ret_period, otp)

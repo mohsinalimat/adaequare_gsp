@@ -12,13 +12,16 @@ from adaequare_gsp.monkey_patches.create_party import gst_category_map
 class AdaequareSettings(Document):
     def validate(self):
         self.validate_credentials()
-    
+
     def validate_credentials(self):
         creds_list = []
         for creds in self.gst_credentials:
             creds_id = f"{creds.service}-{creds.gstin}"
             if creds_id in creds_list:
-                frappe.throw("GST credentials should be unique for Service - GSTIN combination. Kindly remove duplicate credentials", title="Duplicate GST Credentials")
+                frappe.throw(
+                    "GST credentials should be unique for Service - GSTIN combination. Kindly remove duplicate credentials",
+                    title="Duplicate GST Credentials",
+                )
 
             creds_list.append(f"{creds.service}-{creds.gstin}")
 
