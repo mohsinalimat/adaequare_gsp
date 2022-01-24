@@ -111,11 +111,7 @@ class AuthApi:
         return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
     def no_error_found(self, r):
-        return (
-            True
-            if self.success(r) or self.otp_required(r) or self.no_docs_found(r)
-            else False
-        )
+        return self.success(r) or self.otp_required(r) or self.no_docs_found(r)
 
     def success(self, r):
         return (
@@ -125,7 +121,7 @@ class AuthApi:
         )
 
     def otp_required(self, r):
-        return True if r.get("errorCode") == "RETOTPREQUEST" else False
+        return r.get("errorCode") == "RETOTPREQUEST"
 
     def no_docs_found(self, r):
         if not r.get("errorCode"):

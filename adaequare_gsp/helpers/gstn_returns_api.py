@@ -1,6 +1,7 @@
 import json
 import frappe
 
+from frappe.utils import now
 from adaequare_gsp.helpers.auth_api import AuthApi
 
 
@@ -27,11 +28,11 @@ class GstnReturnsApi(AuthApi):
                 title="Credentials unavailable",
             )
 
-    def get_params(self, action, ret_period):
+    def get_params(self, action, ret_period, rtnprd):
         return {
             "action": action,
             "gstin": self.comp_gstin,
-            "rtnprd": ret_period,
+            "rtnprd": rtnprd,
             "ret_period": ret_period,
         }
 
@@ -46,14 +47,41 @@ class GstnReturnsApi(AuthApi):
             "Authorization": self.settings.access_token,
         }
 
-    def make_get_request(self, action, ret_period, otp):
+    def make_get_request(self, action, ret_period, otp, rtnprd=None):
         response = self.make_request(
             method="get",
             url_suffix=self.url_suffix,
-            params=self.get_params(action, ret_period),
+            params=self.get_params(action, ret_period, rtnprd),
             headers=self.get_headers(ret_period, otp),
         )
         return frappe._dict(response)
+
+    def create_or_update_download_log(self, gst_return, classification, return_period):
+        doctype = "GSTR Download Log"
+        name = frappe.db.get_value(
+            doctype,
+            {
+                "gstin": self.comp_gstin,
+                "gst_return": gst_return,
+                "classification": classification,
+                "return_period": return_period,
+            },
+            fieldname="name",
+        )
+        if name:
+            frappe.db.set_value(doctype, name, "last_updated_on", now())
+        else:
+            doc = frappe.get_doc(
+                {
+                    "doctype": doctype,
+                    "gstin": self.comp_gstin,
+                    "gst_return": gst_return,
+                    "classification": classification,
+                    "return_period": return_period,
+                }
+            )
+            doc.last_updated_on = now()
+            doc.save(ignore_permissions=True)
 
 
 class Gstr2bApi(GstnReturnsApi):
@@ -62,4 +90,14 @@ class Gstr2bApi(GstnReturnsApi):
         self.url_suffix = "/gstr2b?"
 
     def get_gstr_2b(self, ret_period, otp):
-        return self.make_get_request("GET2B", ret_period, otp)
+        return self.make_get_request("GET2B", None, otp, ret_period)
+        # TODO: Create further calls if more than one file to download
+
+
+class Gstr2aApi(GstnReturnsApi):
+    def __init__(self, company_gstin):
+        super().__init__(company_gstin)
+        self.url_suffix = "/gstr2a?"
+
+    def get_gstr_2a(self, action, ret_period, otp):
+        return self.make_get_request(action, ret_period, otp)

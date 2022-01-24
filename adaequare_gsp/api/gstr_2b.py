@@ -1,31 +1,13 @@
 import json
 import frappe
-from frappe.utils import now
 from datetime import datetime
 from adaequare_gsp.helpers.gstn_returns_api import Gstr2bApi
 from adaequare_gsp.helpers.schema.gstr_2b import (
     DATA_2B,
     MODIFY_DATA_2B,
-    SUP_DETAIL,
     MODIFY_SUP_DETAIL,
-    ITEM,
-    B2B,
-    MODIFY_B2B,
-    B2BA,
-    MODIFY_B2BA,
-    CDNR,
-    MODIFY_CDNR,
-    CDNRA,
-    MODIFY_CDNRA,
-    ISD,
-    MODIFY_ISD,
-    ISDA,
-    MODIFY_ISDA,
-    IMPG,
-    MODIFY_IMPG,
+    CLASS_MAP,
 )
-
-DATE_FORMAT = "%d-%m-%Y"
 
 
 @frappe.whitelist()
@@ -39,12 +21,11 @@ def get_gstr_2b(gstin, ret_periods, otp=None):
         if api.otp_required(response):
             return response
         elif api.no_docs_found(response):
-            create_or_update_download_log(gstin, gst_return, "", ret_period)
-            # TODO: Create further calls if more than one file to download
+            api.create_or_update_download_log(gst_return, "", ret_period)
         else:
             validate_response(response, gstin, ret_period)
-            create_or_update_download_log(gstin, gst_return, "", ret_period)
-            create_or_update_transaction(response, api.company, now=False)
+            api.create_or_update_download_log(gst_return, "", ret_period)
+            create_or_update_transaction(response, [gstin, api.company], now=False)
 
 
 def validate_response(response, gstin, ret_period):
@@ -58,124 +39,131 @@ def validate_response(response, gstin, ret_period):
         )
 
 
-def create_or_update_download_log(gstin, gst_return, classification, return_period):
-    doctype = "GSTR Download Log"
-    name = frappe.db.get_value(
-        doctype,
-        {
-            "gstin": gstin,
-            "gst_return": gst_return,
-            "classification": classification,
-            "return_period": return_period,
-        },
-        fieldname="name",
-    )
-    if name:
-        frappe.db.set_value(doctype, name, "last_updated_on", now())
-    else:
-        doc = frappe.get_doc(
-            {
-                "doctype": doctype,
-                "gstin": gstin,
-                "gst_return": gst_return,
-                "classification": classification,
-                "return_period": return_period,
-            }
-        )
-        doc.last_updated_on = now()
-        doc.save(ignore_permissions=True)
-
-
-def create_or_update_transaction(response, gstin_info, now):
-    docdata = response.get("data").get("docdata")
-    modify_trans(response.get("data"), MODIFY_DATA_2B)
-    subtyps = {
-        "B2B": ["inv", B2B, MODIFY_B2B],
-        "B2BA": ["inv", B2BA, MODIFY_B2BA],
-        "CDNR": ["nt", CDNR, MODIFY_CDNR],
-        "CDNRA": ["nt", CDNRA, MODIFY_CDNRA],
-        "ISD": ["doclist", ISD, MODIFY_ISD],
-        "ISDA": ["doclist", ISDA, MODIFY_ISDA],
-        "IMPG": ["boe", IMPG, MODIFY_IMPG],
-        "IMPGSEZ": ["boe", IMPG, MODIFY_IMPG],
-    }
-
-    for subtyp in subtyps:
+def create_or_update_transaction(response, company_info, now):
+    modify_dict(response.get("data"), MODIFY_DATA_2B)
+    for subtyp in CLASS_MAP:
         frappe.enqueue(
             create_or_update_b2b,
             now=now,
             enqueue_after_commit=True,
             response=response,
-            gstin_info=gstin_info,
+            company_info=company_info,
             classification=subtyp,
-            class_details=subtyps[subtyp],
-            docdata=docdata,
         )
 
 
-def create_or_update_b2b(response, gstin_info, classification, class_details, docdata):
+def create_or_update_b2b(response, company_info, classification):
     doctype = "Inward Supply"
-    typ, b2b, modify_b2b = class_details
-    b2b_data = docdata.get(classification.lower())
+    typ, items, class_field, modify_class_field, sup_field, item_field = CLASS_MAP[
+        classification
+    ]
+    b2b_data = response.get("data").get("docdata").get(classification.lower())
     if not b2b_data:
         return
-    if classification == "IMPG":
+    if not b2b_data[0].get(typ):
         b2b_data = [{typ: b2b_data}]
-    for sup in b2b_data:
-        modify_trans(sup, MODIFY_SUP_DETAIL)
-        for inv in sup.get(typ):
-            modify_trans(inv, modify_b2b)
+    for sup_dict in b2b_data:
+        modify_dict(sup_dict, MODIFY_SUP_DETAIL)
+        for inv_dict in sup_dict.get(typ):
+            field_data_map = (
+                (DATA_2B, response.data),
+                (sup_field, sup_dict),
+                (class_field, inv_dict),
+            )
+            modify_dict(inv_dict, modify_class_field)
             trans = transaction_exists(
-                sup.get(SUP_DETAIL.get("supplier_gstin")),
-                sup.get(SUP_DETAIL.get("sup_return_period"), ""),
-                inv.get(b2b.get("doc_number")),
-                classification,
+                sup_dict, sup_field, class_field, inv_dict, classification
             )
 
             doc = frappe.get_doc(doctype, trans) if trans else frappe.new_doc(doctype)
-            doc.update({field: response.data[DATA_2B[field]] for field in DATA_2B})
-            doc.update({field: sup.get(SUP_DETAIL[field]) for field in SUP_DETAIL})
-            doc.update({field: inv.get(b2b[field]) for field in b2b})
-
-            if "ISD" in classification or "IMPG" in classification:
-                doc.update({"items": [{field: inv.get(ITEM[field]) for field in ITEM}]})
-            else:
-                doc.update(
-                    {
-                        "items": [
-                            {field: item.get(ITEM[field]) for field in ITEM}
-                            for item in inv.get("items")
-                        ]
-                    }
-                )
-
-            if classification[-1] == "A":
-                doc.is_amended = 1
-            if doc.gstr_1_filing_date:
-                doc.gstr_1_filled = 1
-
-            doc.classification = classification
-            doc.company = gstin_info
+            update_doc(
+                doc,
+                field_data_map,
+                item_field,
+                company_info,
+                items,
+                classification,
+                inv_dict,
+            )
             doc.save(ignore_permissions=True)
 
 
-def modify_trans(inv, modify_dict):
+def update_doc(
+    doc,
+    field_data_map,
+    item_field,
+    company_info,
+    items,
+    classification,
+    inv_dict,
+    itm_det=None,
+):
+    for field_map in field_data_map:
+        if field_map[0]:
+            doc.update(get_mapped_dict(doc, field_map[0], field_map[1]))
+
+    if not items:
+        doc.update({"items": [get_mapped_dict(doc, item_field, inv_dict)]})
+    else:
+        doc.update(
+            {
+                "items": [
+                    get_mapped_dict(doc, item_field, item_dict, itm_det)
+                    for item_dict in inv_dict.get(items)
+                ]
+            }
+        )
+    if classification[-1] == "A":
+        doc.is_amended = 1
+    if doc.gstr_1_filing_date:
+        doc.gstr_1_filled = 1
+    doc.classification = classification
+    doc.company_gstin, doc.company = company_info
+
+
+def get_mapped_dict(doc, field_map, data_dict, itm_det=False):
+    if itm_det:
+        return {
+            field: data_dict.get("itm_det").get(field_map[field])
+            or data_dict.get(field_map[field])
+            or doc.get(field)
+            for field in field_map
+        }
+    else:
+        return {
+            field: data_dict.get(field_map[field]) or doc.get(field)
+            for field in field_map
+        }
+
+
+def modify_dict(inv, modify_dict):
     for detail in modify_dict:
-        if modify_dict[detail] == "DATE" and inv.get(detail):
-            inv[detail] = datetime.strptime(inv.get(detail), DATE_FORMAT)
-        elif type(modify_dict[detail]) == dict:
+        if type(modify_dict[detail]) == dict:
             inv[detail] = modify_dict[detail].get(inv.get(detail))
+        elif not inv.get(detail):
+            continue
+        elif callable(modify_dict[detail]):
+            inv[detail] = modify_dict[detail](inv.get(detail))
+        elif "%" in modify_dict[detail]:
+            inv[detail] = datetime.strptime(inv.get(detail), modify_dict[detail])
 
 
-def transaction_exists(supplier_gstin, sup_return_period, doc_number, classification):
+def transaction_exists(sup_dict, sup_detail, b2b_dict, inv_dict, classification):
+    filters = {
+        "supplier_gstin": sup_dict.get(sup_detail.get("supplier_gstin"))
+        or inv_dict.get(b2b_dict.get("supplier_gstin"), ""),
+        "doc_date": inv_dict.get(b2b_dict.get("doc_date")),
+        "doc_number": inv_dict.get(b2b_dict.get("doc_number")),
+        "classification": classification,
+    }
+    if not sup_dict.get(sup_detail.get("supplier_gstin")) and not inv_dict.get(
+        b2b_dict.get("supplier_gstin")
+    ):
+        filters.pop("supplier_gstin")
+
     name = frappe.db.get_value(
         "Inward Supply",
-        {
-            "supplier_gstin": supplier_gstin,
-            "sup_return_period": sup_return_period,
-            "doc_number": doc_number,
-            "classification": classification,
-        },
+        filters,
         fieldname="name",
     )
     return name

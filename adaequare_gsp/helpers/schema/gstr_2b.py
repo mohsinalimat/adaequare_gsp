@@ -1,6 +1,7 @@
 import frappe
 from adaequare_gsp.helpers.schema.states import number_state_mapping
 
+DATE_FORMAT = "%d-%m-%Y"
 GST_CATEGORY = {
     "R": "Regular",
     "SEZWP": "SEZ supplies with payment of tax",
@@ -10,6 +11,7 @@ GST_CATEGORY = {
 }
 NOTE_TYPE = {"C": "Credit Note", "D": "Debit Note"}
 ISD_TYPE = {"ISDC": "ISD Credit Note", "ISDI": "ISD Invoice"}
+YES_NO = {"Y": 1, "N": 0}
 
 DATA_2B = {
     "company_gstin": "gstin",
@@ -18,7 +20,7 @@ DATA_2B = {
 }
 
 MODIFY_DATA_2B = {
-    "gendt": "DATE",
+    "gendt": DATE_FORMAT,
 }
 
 SUP_DETAIL = {
@@ -29,7 +31,7 @@ SUP_DETAIL = {
 }
 
 MODIFY_SUP_DETAIL = {
-    "supfildt": "DATE",
+    "supfildt": DATE_FORMAT,
 }
 
 B2B = frappe._dict(
@@ -54,15 +56,15 @@ MODIFY_B2B = frappe._dict(
     {
         "typ": GST_CATEGORY,
         "pos": number_state_mapping,
-        "rev": {"Y": 1, "N": 0},
+        "rev": YES_NO,
         "itcavl": {"Y": "Yes", "N": "No", "T": "Temporary"},
         "rsn": {
             "P": "POS and supplier state are same but recipient state is different",
             "C": "Return filed post annual cut-off",
         },
         "diffprcnt": {1: 1, 0.65: 0.65, None: 1},
-        "dt": "DATE",
-        "irngendate": "DATE",
+        "dt": DATE_FORMAT,
+        "irngendate": DATE_FORMAT,
         "doc_type": {None: "Invoice"},
     }
 )
@@ -80,7 +82,7 @@ ITEM = {
 B2BA = frappe._dict(B2B).update(
     {"original_doc_number": "oinum", "original_doc_date": "oidt"}
 )
-MODIFY_B2BA = frappe._dict(MODIFY_B2B).update({"oidt": "DATE"})
+MODIFY_B2BA = frappe._dict(MODIFY_B2B).update({"oidt": DATE_FORMAT})
 
 CDNR = frappe._dict(B2B).update(
     {"doc_number": "ntnum", "doc_type": "typ", "supply_type": "suptyp"}
@@ -100,7 +102,9 @@ CDNRA = frappe._dict(CDNR).update(
         "original_doc_type": "onttyp",
     }
 )
-MODIFY_CDNRA = frappe._dict(MODIFY_CDNR).update({"ontdt": "DATE", "onttyp": NOTE_TYPE})
+MODIFY_CDNRA = frappe._dict(MODIFY_CDNR).update(
+    {"ontdt": DATE_FORMAT, "onttyp": NOTE_TYPE}
+)
 
 ISD = frappe._dict(
     {
@@ -115,7 +119,7 @@ MODIFY_ISD = frappe._dict(
     {
         "itcelg": {"Y": "Yes", "N": "No"},
         "doctyp": ISD_TYPE,
-        "docdt": "DATE",
+        "docdt": DATE_FORMAT,
     }
 )
 
@@ -126,7 +130,9 @@ ISDA = frappe._dict(ISD).update(
         "original_doc_date": "odocdt",
     }
 )
-MODIFY_ISDA = frappe._dict(MODIFY_ISD).update({"odoctyp": ISD_TYPE, "odocdt": "DATE"})
+MODIFY_ISDA = frappe._dict(MODIFY_ISD).update(
+    {"odoctyp": ISD_TYPE, "odocdt": DATE_FORMAT}
+)
 
 IMPG = frappe._dict(
     {
@@ -140,7 +146,21 @@ IMPG = frappe._dict(
 MODIFY_IMPG = frappe._dict(
     {
         "doc_type": {None: "Bill of Entry"},
-        "boedt": "DATE",
-        "isamd": {"Y": 1, "N": 0},
+        "boedt": DATE_FORMAT,
+        "isamd": YES_NO,
+    }
+)
+
+
+CLASS_MAP = (
+    {  # within each class 1. inv_list 2. item_list 3. invoice_field_map 4. modification
+        "B2B": ["inv", "items", B2B, MODIFY_B2B, SUP_DETAIL, ITEM],
+        "B2BA": ["inv", "items", B2BA, MODIFY_B2BA, SUP_DETAIL, ITEM],
+        "CDNR": ["nt", "items", CDNR, MODIFY_CDNR, SUP_DETAIL, ITEM],
+        "CDNRA": ["nt", "items", CDNRA, MODIFY_CDNRA, SUP_DETAIL, ITEM],
+        "ISD": ["doclist", "", ISD, MODIFY_ISD, SUP_DETAIL, ITEM],
+        "ISDA": ["doclist", "", ISDA, MODIFY_ISDA, SUP_DETAIL, ITEM],
+        "IMPG": ["boe", "", IMPG, MODIFY_IMPG, {}, ITEM],
+        "IMPGSEZ": ["boe", "", IMPG, MODIFY_IMPG, SUP_DETAIL, ITEM],
     }
 )
