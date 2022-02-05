@@ -129,7 +129,7 @@ class AuthApi:
 
         no_docs_found = {
             "gstr_2b": ["RET2B1023", "RET2B1016"],
-            "gstr_2a": ["RET13509"],
+            "gstr_2a": ["RET13508", "RET13509", "RET13510"],
             "gstr_1": ["RET11416"],
             "gstr_3b": ["RT-3BAS1009"],
         }

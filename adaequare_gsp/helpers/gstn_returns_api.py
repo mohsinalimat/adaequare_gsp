@@ -52,7 +52,7 @@ class GstnReturnsApi(AuthApi):
             method="get",
             url_suffix=self.url_suffix,
             params=self.get_params(action, ret_period, rtnprd),
-            headers=self.get_headers(ret_period, otp),
+            headers=self.get_headers(ret_period or rtnprd, otp),
         )
         return frappe._dict(response)
 

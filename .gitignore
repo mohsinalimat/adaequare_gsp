@@ -2,5 +2,6 @@
 *.pyc
 *.egg-info
 *.swp
+*.vscode
 tags
 adaequare_gsp/docs/current

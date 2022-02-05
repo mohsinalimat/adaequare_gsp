@@ -21,6 +21,7 @@
   "column_break_13",
   "doc_date",
   "supply_type",
+  "classification",
   "reverse_charge",
   "section_break_16",
   "items",
@@ -49,9 +50,11 @@
   "original_doc_date",
   "original_doc_type",
   "section_break_22",
-  "status",
+  "action",
+  "link_doctype",
   "column_break_27",
-  "classification",
+  "match_status",
+  "link_name",
   "section_break_43",
   "sup_return_period",
   "gstr_1_filled",
@@ -216,12 +219,6 @@
    "label": "Links"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "\nIgnored"
-  },
-  {
    "fieldname": "column_break_27",
    "fieldtype": "Column Break"
   },
@@ -324,11 +321,37 @@
    "fieldtype": "Select",
    "label": "Supply Type",
    "options": "\nRegular\nSEZ Without Payment of Tax\nSEZ With Payment of Tax\nDeemend Exports"
+  },
+  {
+   "default": "No Action",
+   "fieldname": "action",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Action",
+   "options": "No Action\nAccept My Values\nAccept Supplier Values\nReject\nIgnore\nPending"
+  },
+  {
+   "fieldname": "link_doctype",
+   "fieldtype": "Link",
+   "label": "Link Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "link_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Link Name",
+   "options": "link_doctype"
+  },
+  {
+   "fieldname": "match_status",
+   "fieldtype": "Select",
+   "label": "Match Status",
+   "options": "\nExact Match\nPartial Match\nMismatch"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-21 06:10:39.355699",
+ "modified": "2022-02-03 19:22:43.939081",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Inward Supply",

@@ -17,7 +17,7 @@
    "fieldname": "classification",
    "fieldtype": "Select",
    "label": "Classification",
-   "options": "\nB2B"
+   "options": "\nB2B\nB2BA\nCDNR\nCDNRA\nISD\nISDA\nIMPG\nIMPGSEZ"
   },
   {
    "fieldname": "last_updated_on",
@@ -42,7 +42,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-18 12:48:29.665742",
+ "modified": "2022-02-03 10:25:45.692888",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "GSTR Download Log",

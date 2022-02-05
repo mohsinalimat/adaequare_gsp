@@ -26,6 +26,7 @@ def get_gstr_2b(gstin, ret_periods, otp=None):
             validate_response(response, gstin, ret_period)
             api.create_or_update_download_log(gst_return, "", ret_period)
             create_or_update_transaction(response, [gstin, api.company], now=False)
+    return "Success"
 
 
 def validate_response(response, gstin, ret_period):
@@ -86,6 +87,7 @@ def create_or_update_b2b(response, company_info, classification):
                 inv_dict,
             )
             doc.save(ignore_permissions=True)
+        # TODO update data availability for 2A from 2B
 
 
 def update_doc(

@@ -17,17 +17,21 @@ def get_gstr_2a(gstin, ret_periods, otp=None):
         api = Gstr2aApi(gstin)
         for act in ACTIONS:
             response = api.get_gstr_2a(act, ret_period, otp)
+            classification = CLASS_MAP[act][2]
             if api.otp_required(response):
                 return response
             elif api.no_docs_found(response):
-                api.create_or_update_download_log(gst_return, act, ret_period)
+                api.create_or_update_download_log(
+                    gst_return, classification, ret_period
+                )
             else:
                 validate_response(response, act)
-                api.create_or_update_download_log(gst_return, act, ret_period)
+                api.create_or_update_download_log(
+                    gst_return, classification, ret_period
+                )
                 create_or_update_transaction(
                     response, act, [gstin, api.company], now=True
                 )
-                break
     return "Success"
 
 
@@ -75,7 +79,9 @@ def create_or_update_b2b(response, company_info, action):
             trans = transaction_exists(
                 sup_dict, sup_field, class_field, inv_dict, classification
             )
-
+            # TODO Deal with cases where registration is cancelled.
+            # TODO Update logs with few details to ensure that we do not download data in 2A where its not required.
+            # Basis: GSTR1 Period of Supplier from 2B. Type of Transactions of Customer where there are no imports.
             doc = frappe.get_doc(doctype, trans) if trans else frappe.new_doc(doctype)
             update_doc(
                 doc,
