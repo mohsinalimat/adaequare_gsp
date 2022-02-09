@@ -152,6 +152,7 @@ IMPGSEZ = frappe._dict(IMPG).update(
 
 
 ACTIONS = ["B2B", "B2BA", "CDN", "CDNA", "ISD", "IMPG", "IMPGSEZ"]
+CLASSIFICATION = ["B2B", "B2BA", "CDNR", "CDNRA", "ISD", "IMPG", "IMPGSEZ"]
 # TODO: ISD and IMPG should be a part of configuration. Only if user deals in such transactions should it be imported.
 #        eg: If company or user deals in SEZ imports, only them should IMPGSEZ whould be called.
 

@@ -368,8 +368,12 @@ function toTitleCase(text) {
 
 adaequare_gsp.gst_category_map = {
   Regular: 'Registered Regular',
+  'Input Service Distributor (ISD)': 'Registered Regular',
   Composition: 'Registered Composition',
+  'Tax Deductor': 'Tax Deductor',
   'SEZ Unit': 'SEZ',
-  'Non Resident Online Services Provider': 'UIN Holders',
+  'SEZ Developer': 'SEZ',
+  'United Nation Body': 'UIN Holders',
+  'Consulate or Embassy of Foreign Country': 'UIN Holders',
   URP: 'Unregistered'
 };

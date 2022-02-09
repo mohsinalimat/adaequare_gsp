@@ -13,7 +13,9 @@ from adaequare_gsp.helpers.schema.gstr_2b import (
 @frappe.whitelist()
 def get_gstr_2b(gstin, ret_periods, otp=None):
     gst_return = "GSTR 2B"
-    ret_periods = json.loads(ret_periods)
+    if type(ret_periods) != list:
+        ret_periods = json.loads(ret_periods)
+
     for ret_period in ret_periods:
         api = Gstr2bApi(gstin)
         response = api.get_gstr_2b(ret_period, otp)

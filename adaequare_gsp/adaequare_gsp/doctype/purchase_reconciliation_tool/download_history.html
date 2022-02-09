@@ -1,0 +1,20 @@
+<div class="download_data">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                {% for k, v in data[0].items()%}
+                <th class="text-left">{{k}}</th>
+                {% endfor%}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data%}
+            <tr>
+                {% for value in row%}
+                <td>{{ row[value] }}</td>
+                {% endfor%}
+            </tr>
+            {% endfor%}
+        </tbody>
+    </table>
+</div>

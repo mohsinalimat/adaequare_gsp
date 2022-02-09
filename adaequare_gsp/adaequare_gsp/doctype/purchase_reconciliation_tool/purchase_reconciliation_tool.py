@@ -2,8 +2,14 @@
 # For license information, please see license.txt
 
 import frappe
+import pandas as pd
+
+from datetime import datetime
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
+from adaequare_gsp.helpers.schema.gstr_2a import CLASSIFICATION
+from adaequare_gsp.api.gstr_2a import get_gstr_2a
+from adaequare_gsp.api.gstr_2b import get_gstr_2b
 from fuzzywuzzy import process, fuzz
 
 
@@ -249,7 +255,7 @@ class PurchaseReconciliationTool(Document):
             f"{fy[0]}/{fy[1][2:]}",
             f"{fy[0][2:]}-{fy[1][2:]}",
             f"{fy[0][2:]}/{fy[1][2:]}",
-            "/",
+            "/",  # these are only special characters allowed in invoice
             "-",
         ]
 
@@ -258,3 +264,91 @@ class PurchaseReconciliationTool(Document):
             inv = inv.replace(replace, " ")
         inv = " ".join(inv.split()).lstrip("0")
         return inv
+
+    @frappe.whitelist()
+    def download_all_gstr(self, gstr_name, fiscal_year, otp=None):
+        periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
+        if gstr_name == "GSTR 2A":
+            response = get_gstr_2a(self.company_gstin, periods, otp)
+        elif gstr_name == "GSTR 2B":
+            for period in periods[:]:
+                download = next(
+                    (i for i in download_history if i.return_period == period),
+                    None,
+                )
+                if download:
+                    periods.remove(period)
+            response = get_gstr_2b(self.company_gstin, periods, otp)
+        return response
+
+    @frappe.whitelist()
+    def download_missing_gstr(self, gstr_name, fiscal_year, otp=None):
+        if gstr_name != "GSTR 2A":
+            return
+
+        periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
+        for period in periods[:]:
+            download = next(
+                (i for i in download_history if i.return_period == period),
+                None,
+            )
+            if download:
+                periods.remove(period)
+
+        response = get_gstr_2a(self.company_gstin, periods, otp)
+        return response
+
+    @frappe.whitelist()
+    def fetch_download_history(self, gstr_name, fiscal_year):
+        periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
+
+        data = []
+        for period in reversed(periods):
+            for _class in CLASSIFICATION:
+                download = next(
+                    (
+                        i
+                        for i in download_history
+                        if i.return_period == period
+                        and i.classification in [_class, ""]
+                    ),
+                    None,
+                )
+                _dict = {
+                    "Period": period,
+                    "Classification": _class if gstr_name == "GSTR 2A" else "ALL",
+                }
+                if download:
+                    _dict["Last Updated On"] = download.last_updated_on.strftime(
+                        "%d-%m-%Y %H:%M:%S"
+                    )
+                else:
+                    _dict["Last Updated On"] = "Not Yet Downloaded"
+
+                if _dict not in data:
+                    data.append(_dict)
+
+        template = frappe.render_template(
+            "adaequare_gsp/doctype/purchase_reconciliation_tool/download_history.html",
+            {"data": data},
+        )
+        return template
+
+    def get_downloads_history(self, gstr_name, fiscal_year):
+        fy_start, fy_end = frappe.db.get_value(
+            "Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"]
+        )
+        today = datetime.today().date()
+        fy_end = today if fy_end > today else fy_end
+        periods = pd.date_range(fy_start, fy_end, freq="MS").strftime("%m%Y").tolist()
+
+        download_history = frappe.db.get_list(
+            "GSTR Download Log",
+            filters={
+                "return_period": ["in", periods],
+                "gstin": self.company_gstin,
+                "gst_return": gstr_name,
+            },
+            fields=["return_period", "classification", "last_updated_on"],
+        )
+        return periods, download_history
