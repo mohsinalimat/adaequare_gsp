@@ -15,7 +15,9 @@
   "column_break_6",
   "inward_supply_period",
   "inward_supply_from_date",
-  "inward_supply_to_date"
+  "inward_supply_to_date",
+  "section_break_11",
+  "html_data"
  ],
  "fields": [
   {
@@ -74,13 +76,21 @@
    "fieldtype": "Date",
    "label": "To Date",
    "read_only_depends_on": "eval: doc.inward_supply_period != 'Custom'"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "html_data",
+   "fieldtype": "HTML"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-31 19:16:50.007170",
+ "modified": "2022-02-06 12:51:45.492046",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Purchase Reconciliation Tool",

@@ -21,7 +21,7 @@ gst_category_map = {
 # ####### SAMPLE DATA ########
 # "Composition" - 36AASFP8573D2ZN
 # "Input Service Distributor (ISD)" - 29AABCF8078M2ZW - Flipkart
-# "Tax Deductor" - 06DELI09652G1DA, 09ALDN00287A1DD, 27AAFT56212B1DO
+# "Tax Deductor" - 06DELI09652G1DA, 09ALDN00287A1DD, 27AAFT56212B1DO, 19AAACI1681G1DV
 # "SEZ Developer" - 27AAJCS5738D1Z6 -
 # "United Nation Body" - 0717UNO00157UNO, 0717UNO00211UN2, 2117UNO00002UNF
 # "Consulate or Embassy of Foreign Country" - 0717UNO00154UNU

@@ -319,7 +319,7 @@ class PurchaseReconciliationTool(Document):
                     "Classification": _class if gstr_name == "GSTR 2A" else "ALL",
                 }
                 if download:
-                    _dict["Last Updated On"] = download.last_updated_on.strftime(
+                    _dict["Last Updated On"] = "✅ " + download.last_updated_on.strftime(
                         "%d-%m-%Y %H:%M:%S"
                     )
                 else:

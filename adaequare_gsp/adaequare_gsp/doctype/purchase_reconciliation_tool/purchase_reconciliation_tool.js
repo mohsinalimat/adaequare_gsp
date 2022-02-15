@@ -141,7 +141,7 @@ reco_tool.download_gstr = function (frm, d, method, otp=null) {
 		otp: otp
 	}).then(r => {
 		if (r.message.errorCode == 'RETOTPREQUEST') {
-			reco_tool.get_gstin_otp(reco_tool.download_all, frm, d, method)
+			reco_tool.get_gstin_otp(reco_tool.download_gstr, frm, d, method)
 		}
 	})
 }
