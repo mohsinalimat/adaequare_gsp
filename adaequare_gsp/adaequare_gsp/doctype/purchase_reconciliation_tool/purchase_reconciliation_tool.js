@@ -129,7 +129,8 @@ reco_tool.fetch_download_history = function (frm, d) {
 		if (!r.message) {
 			return;
 		}
-		d.fields[4].options = r.message;
+        console.log(d.fields);
+        d.fields.find(f => f.fieldname == "download_history").options = r.message;
 		d.refresh();
 	})
 };

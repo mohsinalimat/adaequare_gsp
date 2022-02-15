@@ -2,18 +2,35 @@
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
-                {% for k, v in data[0].items()%}
+                {% for k in columns%}
                 <th class="text-left">{{k}}</th>
                 {% endfor%}
             </tr>
         </thead>
         <tbody>
-            {% for row in data%}
-            <tr>
-                {% for value in row%}
-                <td>{{ row[value] }}</td>
-                {% endfor%}
-            </tr>
+            {% set previous_period = '' %}
+            {% for period in data %}
+                <!-- for first class -->
+                <tr>
+                    {% if period != previous_period %}
+                    <td rowspan="{{data[period]|length}}">{{period}}</td>
+                    {% set previous_period = period %}
+                    {% endif %}
+                    {% for k, v in data[period].pop(0).items() %}
+                    <td>{{v}}</td>
+                    {% endfor %}
+                </tr>
+
+                <!-- for more than one class -->
+                {% if data[period] %}
+                {% for class in data[period] %}
+                <tr>
+                    {% for k, v in class.items() %}
+                    <td>{{v}}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                {% endif %}
             {% endfor%}
         </tbody>
     </table>

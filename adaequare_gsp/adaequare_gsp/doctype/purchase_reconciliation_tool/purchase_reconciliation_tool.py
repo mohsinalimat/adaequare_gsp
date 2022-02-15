@@ -3,6 +3,7 @@
 
 import frappe
 import pandas as pd
+import re
 
 from datetime import datetime
 from frappe.model.document import Document
@@ -302,8 +303,10 @@ class PurchaseReconciliationTool(Document):
     def fetch_download_history(self, gstr_name, fiscal_year):
         periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
 
-        data = []
+        columns = ["Period", "Classification", "Status", "Downloaded On"]
+        data = {}
         for period in reversed(periods):
+            data[period] = []
             for _class in CLASSIFICATION:
                 download = next(
                     (
@@ -315,22 +318,19 @@ class PurchaseReconciliationTool(Document):
                     None,
                 )
                 _dict = {
-                    "Period": period,
                     "Classification": _class if gstr_name == "GSTR 2A" else "ALL",
+                    "Status": "Downloaded" if download else "Not Downloaded",
+                    "Downloaded On": "✅ "
+                    + download.last_updated_on.strftime("%d-%m-%Y %H:%M:%S")
+                    if download
+                    else "",
                 }
-                if download:
-                    _dict["Last Updated On"] = "✅ " + download.last_updated_on.strftime(
-                        "%d-%m-%Y %H:%M:%S"
-                    )
-                else:
-                    _dict["Last Updated On"] = "Not Yet Downloaded"
-
-                if _dict not in data:
-                    data.append(_dict)
+                if _dict not in data[period]:
+                    data[period].append(_dict)
 
         template = frappe.render_template(
             "adaequare_gsp/doctype/purchase_reconciliation_tool/download_history.html",
-            {"data": data},
+            {"columns": columns, "data": data},
         )
         return template
 
