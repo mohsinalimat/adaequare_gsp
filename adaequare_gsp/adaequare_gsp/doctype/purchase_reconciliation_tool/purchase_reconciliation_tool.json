@@ -16,8 +16,14 @@
   "inward_supply_period",
   "inward_supply_from_date",
   "inward_supply_to_date",
-  "section_break_11",
-  "html_data"
+  "purchase_reconcile",
+  "summary_tab",
+  "supplier_tab",
+  "invoice_tab",
+  "section_break_15",
+  "summary_dt",
+  "supplier_level_dt",
+  "invoice_level_dt"
  ],
  "fields": [
   {
@@ -78,19 +84,43 @@
    "read_only_depends_on": "eval: doc.inward_supply_period != 'Custom'"
   },
   {
-   "fieldname": "section_break_11",
+   "fieldname": "purchase_reconcile",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "html_data",
+   "fieldname": "summary_dt",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "supplier_level_dt",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "invoice_level_dt",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "summary_tab",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "supplier_tab",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "invoice_tab",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-06 12:51:45.492046",
+ "modified": "2022-02-11 10:47:17.550106",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Purchase Reconciliation Tool",
@@ -108,5 +138,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -4,7 +4,7 @@ frappe.provide("adaequare_gsp");
 frappe.provide("reco_tool");
 
 frappe.ui.form.on("Purchase Reconciliation Tool", {
-    refresh: function (frm) {
+    refresh(frm) {
         adaequare_gsp.get_date_range(
             frm,
             frm.doc.purchase_period,
@@ -32,7 +32,7 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
             "Download"
         );
     },
-    purchase_period: function (frm) {
+    purchase_period(frm) {
         adaequare_gsp.get_date_range(
             frm,
             frm.doc.purchase_period,
@@ -40,13 +40,181 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
             "purchase_to_date"
         );
     },
-    inward_supply_period: function (frm) {
+    inward_supply_period(frm) {
         adaequare_gsp.get_date_range(
             frm,
             frm.doc.inward_supply_period,
             "inward_supply_from_date",
             "inward_supply_to_date"
         );
+    },
+    setup(frm) {
+        frm.trigger("render_tab_html");
+    },
+
+    render_tab_html(frm) {
+        const tabs = [
+            {
+                label: "Summary",
+                name: "summary",
+            },
+            {
+                label: "Supplier Level",
+                name: "supplier_level",
+            },
+            {
+                label: "Invoice Level",
+                name: "invoice_level",
+            },
+        ];
+        const summary_tab_html = frappe.render_template("reco_tool_nav_tabs", {
+            tabs,
+        });
+
+        // Show summary tab
+        frm.get_field("summary_tab").$wrapper.html(`${summary_tab_html}`);
+
+        const $tabs = $(".purchase-reconcilliation-tool .tab-item");
+        $tabs.click(function (e) {
+            const $this = $(this);
+            $tabs.removeClass("active");
+            $this.addClass("active");
+            const tab_name = $this.attr("data-name");
+            frm.trigger(`render_${tab_name}_data`);
+        });
+    },
+    render_summary_data(frm) {
+        frm.purchase_reconciliation_data_table_manager =
+            new adaequare_gsp.DataTableManager({
+                frm: frm,
+                $reconciliation_tool_dt: frm.get_field("summary_dt").$wrapper,
+                $no_data: $(
+                    '<div class="text-muted text-center">No Matching Data Found</div>'
+                ),
+                method: "get_summary_data",
+                args: {
+                    company_gstin: frm.doc.company_gstin,
+                    purchase_from_date: frm.doc.purchase_from_date,
+                    purchase_to_date: frm.doc.purchase_to_date,
+                    inward_from_date: frm.doc.inward_supply_from_date,
+                    inward_to_date: frm.doc.inward_supply_to_date,
+                },
+                columns: [
+                    {
+                        name: "Match Type",
+                        width: 100,
+                    },
+                    {
+                        name: "No. of Doc Inward Supply",
+                        width: 200,
+                    },
+                    {
+                        name: "No. of Doc Purchase",
+                        width: 200,
+                    },
+                    {
+                        name: "Tax Diff",
+                        width: 100,
+                    },
+                ],
+                format_row(row) {
+                    return [
+                        row["match_status"],
+                        row["no_of_inward_supp"],
+                        row["no_of_doc_purchase"],
+                        row["tax_diff"],
+                    ];
+                },
+            });
+    },
+    render_supplier_level_data(frm) {
+        frm.purchase_reconciliation_data_table_manager =
+            new adaequare_gsp.DataTableManager({
+                frm: frm,
+                $reconciliation_tool_dt:
+                    frm.get_field("supplier_level_dt").$wrapper,
+                $no_data: $(
+                    '<div class="text-muted text-center">No Matching Data Found</div>'
+                ),
+                method: "get_b2b_purchase",
+                args: {
+                    company_gstin: frm.doc.company_gstin,
+                    purchase_from_date: frm.doc.purchase_from_date,
+                    purchase_to_date: frm.doc.purchase_to_date,
+                },
+                columns: [
+                    {
+                        name: "GSTIN",
+                        width: 100,
+                    },
+                    {
+                        name: "Supplier Name",
+                        width: 150,
+                    },
+                    {
+                        name: "No. of Doc Inward Supply",
+                        width: 200,
+                    },
+                    {
+                        name: "No. of Doc Purchase",
+                        width: 200,
+                    },
+                    {
+                        name: "Tax Diff",
+                        width: 100,
+                    },
+                ],
+                format_row(row) {
+                    return [
+                        row[0]["supplier_gstin"],
+                        row[0]["supplier_name"],
+                        row[0]["no_of_inward_supp"],
+                        row.length,
+                        row[0]["tax_diff"],
+                    ];
+                },
+            });
+    },
+    render_invoice_level_data(frm) {
+        frm.purchase_reconciliation_data_table_manager =
+            new adaequare_gsp.DataTableManager({
+                frm: frm,
+                $reconciliation_tool_dt:
+                    frm.get_field("supplier_level_dt").$wrapper,
+                $no_data: $(
+                    '<div class="text-muted text-center">No Matching Data Found</div>'
+                ),
+                method: "get_b2b_purchase",
+                args: {
+                    company_gstin: frm.doc.company_gstin,
+                    purchase_from_date: frm.doc.purchase_from_date,
+                    purchase_to_date: frm.doc.purchase_to_date,
+                },
+                columns: [
+                    [
+                        "GSTIN",
+                        "Supplier Name",
+                        "Inv No.",
+                        "Date",
+                        "Action Status",
+                        "Match Status",
+                        "Purchase Ref",
+                        "Inward Supp Ref",
+                        "Tax Diff",
+                        "Mismatch",
+                        "Action",
+                    ].map((col) => Object({ name: col, width: 100 })),
+                ],
+                format_row(row) {
+                    return [
+                        row[0]["supplier_gstin"],
+                        row[0]["supplier_name"],
+                        row[0]["no_of_inward_supp"],
+                        row.length,
+                        row[0]["tax_diff"],
+                    ];
+                },
+            });
     },
 });
 
@@ -106,14 +274,16 @@ reco_tool.dialog_download_data = function (frm, gst_return) {
                 fieldtype: "HTML",
             },
         ],
-        primary_action_label: gst_return == "GSTR 2A" ? "Download All" : "Download",
-		primary_action() {
-			reco_tool.download_gstr(frm, d, "download_all_gstr")
+        primary_action_label:
+            gst_return == "GSTR 2A" ? "Download All" : "Download",
+        primary_action() {
+            reco_tool.download_gstr(frm, d, "download_all_gstr");
             d.hide();
         },
-        secondary_action_label: gst_return == "GSTR 2A" ? "Download Missing" : "",
+        secondary_action_label:
+            gst_return == "GSTR 2A" ? "Download Missing" : "",
         secondary_action() {
-			reco_tool.download_gstr(frm, d, "download_missing_gstr")
+            reco_tool.download_gstr(frm, d, "download_missing_gstr");
             d.hide();
         },
     });
