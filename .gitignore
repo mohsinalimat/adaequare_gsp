@@ -5,3 +5,4 @@
 *.vscode
 tags
 adaequare_gsp/docs/current
+dist/
