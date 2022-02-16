@@ -49,10 +49,9 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
         );
     },
     setup(frm) {
-        frm.trigger("render_tab_html");
+        frm.trigger("render_data_table");
     },
-
-    render_tab_html(frm) {
+    render_data_table(frm) {
         const tabs = [
             {
                 label: "Summary",
@@ -67,27 +66,30 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
                 name: "invoice_level",
             },
         ];
-        const summary_tab_html = frappe.render_template("reco_tool_nav_tabs", {
-            tabs,
-        });
 
-        // Show summary tab
-        frm.get_field("summary_tab").$wrapper.html(`${summary_tab_html}`);
+        const $data_table_wrapper = frm.get_field("data_table").$wrapper;
+        $data_table_wrapper.html(
+            `${frappe.render_template("data_table_tab_view", {
+                tabs,
+            })}`
+        );
 
-        const $tabs = $(".purchase-reconcilliation-tool .tab-item");
-        $tabs.click(function (e) {
+        const $tabs = $data_table_wrapper.find(".form-tabs .tab-item");
+        $tabs.click(function () {
             const $this = $(this);
             $tabs.removeClass("active");
             $this.addClass("active");
-            const tab_name = $this.attr("data-name");
-            frm.trigger(`render_${tab_name}_data`);
+            frm.trigger(`render_${$this.attr("data-name")}_data`);
         });
+
+        $tabs[0].click();
+        frm.$data_table = $data_table_wrapper.find(".tab-content");
     },
     render_summary_data(frm) {
         frm.purchase_reconciliation_data_table_manager =
             new adaequare_gsp.DataTableManager({
                 frm: frm,
-                $reconciliation_tool_dt: frm.get_field("summary_dt").$wrapper,
+                $reconciliation_tool_dt: frm.$data_table,
                 $no_data: $(
                     '<div class="text-muted text-center">No Matching Data Found</div>'
                 ),
@@ -102,7 +104,6 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
                 columns: [
                     {
                         name: "Match Type",
-                        width: 100,
                     },
                     {
                         name: "No. of Doc Inward Supply",
@@ -110,11 +111,10 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
                     },
                     {
                         name: "No. of Doc Purchase",
-                        width: 200,
+                        width: 150,
                     },
                     {
                         name: "Tax Diff",
-                        width: 100,
                     },
                 ],
                 format_row(row) {
@@ -131,8 +131,7 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
         frm.purchase_reconciliation_data_table_manager =
             new adaequare_gsp.DataTableManager({
                 frm: frm,
-                $reconciliation_tool_dt:
-                    frm.get_field("supplier_level_dt").$wrapper,
+                $reconciliation_tool_dt: frm.$data_table,
                 $no_data: $(
                     '<div class="text-muted text-center">No Matching Data Found</div>'
                 ),
@@ -145,11 +144,10 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
                 columns: [
                     {
                         name: "GSTIN",
-                        width: 100,
                     },
                     {
                         name: "Supplier Name",
-                        width: 150,
+                        width: 200,
                     },
                     {
                         name: "No. of Doc Inward Supply",
@@ -161,7 +159,6 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
                     },
                     {
                         name: "Tax Diff",
-                        width: 100,
                     },
                 ],
                 format_row(row) {
@@ -179,8 +176,7 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
         frm.purchase_reconciliation_data_table_manager =
             new adaequare_gsp.DataTableManager({
                 frm: frm,
-                $reconciliation_tool_dt:
-                    frm.get_field("supplier_level_dt").$wrapper,
+                $reconciliation_tool_dt: frm.$data_table,
                 $no_data: $(
                     '<div class="text-muted text-center">No Matching Data Found</div>'
                 ),
@@ -191,27 +187,57 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
                     purchase_to_date: frm.doc.purchase_to_date,
                 },
                 columns: [
-                    [
-                        "GSTIN",
-                        "Supplier Name",
-                        "Inv No.",
-                        "Date",
-                        "Action Status",
-                        "Match Status",
-                        "Purchase Ref",
-                        "Inward Supp Ref",
-                        "Tax Diff",
-                        "Mismatch",
-                        "Action",
-                    ].map((col) => Object({ name: col, width: 100 })),
+                    {
+                        name: "GSTIN",
+                        width: 150,
+                    },
+                    {
+                        name: "Supplier Name",
+                        width: 200,
+                    },
+                    {
+                        name: "Inv No.",
+                        width: 120,
+                    },
+                    {
+                        name: "Date",
+                        width: 150,
+                    },
+                    {
+                        name: "Action Status",
+                    },
+                    {
+                        name: "Match Status",
+                    },
+                    {
+                        name: "Purchase Ref",
+                    },
+                    {
+                        name: "Inward Supp Ref",
+                    },
+                    {
+                        name: "Tax Diff",
+                    },
+                    {
+                        name: "Mismatch",
+                    },
+                    {
+                        name: "GSActionTIN",
+                    },
                 ],
                 format_row(row) {
                     return [
                         row[0]["supplier_gstin"],
                         row[0]["supplier_name"],
-                        row[0]["no_of_inward_supp"],
-                        row.length,
-                        row[0]["tax_diff"],
+                        row[0]["bill_no"],
+                        row[0]["bill_date"],
+                        "",
+                        "",
+                        row[0]["name"],
+                        "",
+                        "",
+                        "",
+                        "",
                     ];
                 },
             });
@@ -293,26 +319,26 @@ reco_tool.dialog_download_data = function (frm, gst_return) {
 
 reco_tool.fetch_download_history = function (frm, d) {
     frm.call("fetch_download_history", {
-		gstr_name: d.fields_dict.gst_return.value,
-		fiscal_year: d.fields_dict.fiscal_year.value,
-	}).then(r => {
-		if (!r.message) {
-			return;
-		}
-        console.log(d.fields);
-        d.fields.find(f => f.fieldname == "download_history").options = r.message;
-		d.refresh();
-	})
+        gstr_name: d.fields_dict.gst_return.value,
+        fiscal_year: d.fields_dict.fiscal_year.value,
+    }).then((r) => {
+        if (!r.message) {
+            return;
+        }
+        d.fields.find((f) => f.fieldname == "download_history").options =
+            r.message;
+        d.refresh();
+    });
 };
 
-reco_tool.download_gstr = function (frm, d, method, otp=null) {
-	frm.call(method, {
-		gstr_name: d.fields_dict.gst_return.value,
-		fiscal_year: d.fields_dict.fiscal_year.value,
-		otp: otp
-	}).then(r => {
-		if (r.message.errorCode == 'RETOTPREQUEST') {
-			reco_tool.get_gstin_otp(reco_tool.download_gstr, frm, d, method)
-		}
-	})
-}
+reco_tool.download_gstr = function (frm, d, method, otp = null) {
+    frm.call(method, {
+        gstr_name: d.fields_dict.gst_return.value,
+        fiscal_year: d.fields_dict.fiscal_year.value,
+        otp: otp,
+    }).then((r) => {
+        if (r.message.errorCode == "RETOTPREQUEST") {
+            reco_tool.get_gstin_otp(reco_tool.download_gstr, frm, d, method);
+        }
+    });
+};

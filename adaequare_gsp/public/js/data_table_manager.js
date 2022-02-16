@@ -11,7 +11,6 @@ adaequare_gsp.DataTableManager = class DataTableManager {
                 this.args,
                 this.callback
             );
-            console.log("Data", message);
             this.format_data(message);
             this.get_datatable();
         }

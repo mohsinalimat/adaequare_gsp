@@ -1,0 +1,17 @@
+<div class="purchase-reconcilliation-tool form-tabs-list">
+    <ul class="nav form-tabs" id="form-tabs" role="tablist">
+        {% for tab in tabs %}
+        <li class="nav-item">
+            <a
+                class="nav-link tab-item"
+                id="{{ tab.name }}-tab"
+                data-name="{{ tab.name }}"
+                role="tab"
+            >
+                {{ tab.label }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="tab-content mt-3 w-100" id="tabContent"></div>
+</div>
