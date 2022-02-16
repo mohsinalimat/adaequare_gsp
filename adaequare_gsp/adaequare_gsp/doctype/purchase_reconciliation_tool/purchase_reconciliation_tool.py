@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from adaequare_gsp.helpers.schema.gstr_2a import CLASSIFICATION
 from adaequare_gsp.api.gstr_2a import get_gstr_2a
-from adaequare_gsp.api.gstr_2b import get_gstr_2b
+from adaequare_gsp.api.gstr_2b import get_gstr_2b, upload_gstr_2b, get_json_from_url
 from fuzzywuzzy import process, fuzz
 
 
@@ -267,6 +267,12 @@ class PurchaseReconciliationTool(Document):
         return inv
 
     @frappe.whitelist()
+    def upload_gstr(self, gstr_name, fiscal_year, attach_file):
+        # periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
+        response = upload_gstr_2b(self.company_gstin, attach_file)
+        return response
+
+    @frappe.whitelist()
     def download_all_gstr(self, gstr_name, fiscal_year, otp=None):
         periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
         if gstr_name == "GSTR 2A":
@@ -300,10 +306,10 @@ class PurchaseReconciliationTool(Document):
         return response
 
     @frappe.whitelist()
-    def fetch_download_history(self, gstr_name, fiscal_year):
+    def fetch_download_history(self, gstr_name, fiscal_year, process_type):
         periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
 
-        columns = ["Period", "Classification", "Status", "Downloaded On"]
+        columns = ["Period", "Classification", "Status", "Downloaded On" if process_type == "download" else "Uploaded On"]
         data = {}
         for period in reversed(periods):
             data[period] = []
@@ -317,10 +323,15 @@ class PurchaseReconciliationTool(Document):
                     ),
                     None,
                 )
+
+                if process_type == "download":
+                    status = "Downloaded" if download else "Not Downloaded"
+                else:
+                    status = "Uploaded" if download else "Not Uploaded"
                 _dict = {
                     "Classification": _class if gstr_name == "GSTR 2A" else "ALL",
-                    "Status": "Downloaded" if download else "Not Downloaded",
-                    "Downloaded On": "✅ "
+                    "Status": status,
+                    "columns[-1:]": "✅ "
                     + download.last_updated_on.strftime("%d-%m-%Y %H:%M:%S")
                     if download
                     else "",
@@ -352,3 +363,75 @@ class PurchaseReconciliationTool(Document):
             fields=["return_period", "classification", "last_updated_on"],
         )
         return periods, download_history
+
+    @frappe.whitelist()
+    def get_data_from_uploaded_json(self, attach_file):
+        if attach_file:
+            json_response = get_json_from_url(attach_file)
+            ret_period = json_response.get('data').get('rtnprd')
+            return ret_period
+
+@frappe.whitelist()
+def get_summary_data(company_gstin, purchase_from_date, purchase_to_date, inward_from_date, inward_to_date):
+    purchase = frappe.qb.DocType("Purchase Invoice")
+    taxes = frappe.qb.DocType("Purchase Taxes and Charges")
+    purchase_data = (
+        frappe.qb.from_(purchase)
+        .join(taxes)
+        .on(taxes.parent == purchase.name)
+        .where(
+            purchase.posting_date[purchase_from_date : purchase_to_date]
+        )  # TODO instead all purchases not matched yet but gst accounts affected, should come up here after a specific date.
+        .where(company_gstin == purchase.company_gstin)
+        .where(purchase.is_return == 0)
+        .where(purchase.gst_category == "Registered Regular")
+        # .where(purchase.bill_no.like("GST/%"))
+        .groupby(taxes.parent)
+        .select(
+            "name",
+            "supplier_name",
+            "supplier_gstin",
+        )
+        .run(as_dict=True, debug=True)
+    )
+
+    inward_supply = frappe.qb.DocType("Inward Supply")
+    inward_supply_item = frappe.qb.DocType("Inward Supply Item")
+    inward_supply_data = (
+        frappe.qb.from_(inward_supply)
+        .join(inward_supply_item)
+        .on(inward_supply_item.parent == inward_supply.name)
+        .where(
+            inward_supply.doc_date[inward_from_date : inward_to_date]
+        ) 
+        .where(company_gstin == inward_supply.company_gstin)
+        .where(inward_supply.action.isin(["No Action", "Pending"]))
+        .where(inward_supply.link_name.isnull())
+        .where(inward_supply.classification.isin(["B2B", "B2BA"]))
+        .where(inward_supply.doc_date < "2021-08-01")
+        .groupby(inward_supply_item.parent)
+        .select(
+            "name",
+            "supplier_name",
+            "supplier_gstin",
+            inward_supply.doc_number.as_("bill_no"),
+            inward_supply.doc_date.as_("bill_date"),
+            "reverse_charge",
+            "place_of_supply",
+            "classification",
+            Sum(inward_supply_item.taxable_value).as_("taxable_value"),
+            Sum(inward_supply_item.igst).as_("igst"),
+            Sum(inward_supply_item.cgst).as_("cgst"),
+            Sum(inward_supply_item.sgst).as_("sgst"),
+            Sum(inward_supply_item.cess).as_("cess"),
+        )
+        .run(as_dict=True, debug=True)
+    )
+
+    summary_data = []
+    summary_data.append({
+        'no_of_doc_purchase': len(purchase_data),
+        'no_of_inward_supp': len(inward_supply_data),
+        'purchase_data': purchase_data
+    })
+    return summary_data

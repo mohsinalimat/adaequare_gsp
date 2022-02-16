@@ -164,3 +164,5 @@ CLASS_MAP = (
         "IMPGSEZ": ["boe", "", IMPG, MODIFY_IMPG, SUP_DETAIL, ITEM],
     }
 )
+
+FILE_FORMATS = ["json"]

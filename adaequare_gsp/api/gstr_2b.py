@@ -1,5 +1,6 @@
 import json
 import frappe
+import urllib
 from datetime import datetime
 from adaequare_gsp.helpers.gstn_returns_api import Gstr2bApi
 from adaequare_gsp.helpers.schema.gstr_2b import (
@@ -7,6 +8,7 @@ from adaequare_gsp.helpers.schema.gstr_2b import (
     MODIFY_DATA_2B,
     MODIFY_SUP_DETAIL,
     CLASS_MAP,
+    FILE_FORMATS
 )
 
 
@@ -32,6 +34,34 @@ def get_gstr_2b(gstin, ret_periods, otp=None):
             create_or_update_transaction(response, [gstin, api.company], ret_period)
     return "Success"
 
+@frappe.whitelist()
+def upload_gstr_2b(gstin, attach_file):
+    gstr_2b_json = get_json_from_url(attach_file)
+    ret_period = gstr_2b_json.get('data').get('rtnprd')
+    api = Gstr2bApi(gstin)
+    validate_response(gstr_2b_json, gstin, ret_period)
+    api.create_or_update_download_log("GSTR 2B", "", ret_period)
+    create_or_update_transaction(gstr_2b_json, [gstin, api.company], now=False)
+    return "Success"
+
+def get_json_from_url(attach_file):
+    json_url = frappe.utils.get_url(attach_file)
+    file = urllib.request.urlopen(json_url)
+    read_file = file.read()
+    gstr_2b_json = json.loads(read_file)
+    return gstr_2b_json
+
+@frappe.whitelist()
+def validate_file_format(attach_file):
+    if attach_file:
+        file = frappe.get_doc("File", {'file_url': attach_file})
+        extension = file.get_extension()[1].lstrip('.')
+        if extension not in FILE_FORMATS:
+            frappe.delete_doc(file.name)
+            frappe.throw(
+                "Please upload a Json File",
+                title="Invalid File Format",
+            )
 
 def validate_response(response, gstin, ret_period):
     if (
@@ -156,7 +186,10 @@ def modify_dict(inv, modify_dict):
         elif callable(modify_dict[detail]):
             inv[detail] = modify_dict[detail](inv.get(detail))
         elif "%" in modify_dict[detail]:
-            inv[detail] = datetime.strptime(inv.get(detail), modify_dict[detail])
+            if not isinstance(inv.get(detail), datetime):
+                inv[detail] = datetime.strptime(inv.get(detail), modify_dict[detail])
+            else:
+                inv[detail] = inv.get(detail)
 
 
 def transaction_exists(sup_dict, sup_detail, b2b_dict, inv_dict, classification):
