@@ -267,9 +267,9 @@ class PurchaseReconciliationTool(Document):
         return inv
 
     @frappe.whitelist()
-    def upload_gstr(self, gstr_name, fiscal_year, attach_file):
+    def upload_gstr(self, period, attach_file):
         # periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
-        response = upload_gstr_2b(self.company_gstin, attach_file)
+        response = upload_gstr_2b(self.company_gstin, period, attach_file)
         return response
 
     @frappe.whitelist()

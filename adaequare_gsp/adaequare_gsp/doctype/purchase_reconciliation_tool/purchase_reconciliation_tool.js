@@ -141,14 +141,12 @@ reco_tool.download_gstr = function (frm, d, method, otp=null) {
 
 reco_tool.upload_gstr = function (frm, d, method) {
 	frm.call(method, {
-		gstr_name: d.fields_dict.gst_return.value,
-		fiscal_year: d.fields_dict.fiscal_year.value,
+        period: d.fields_dict.period.value,
 		attach_file: d.fields_dict.attach_file.value
 	}).then(r => {
-        frappe.msgprint(_(r.message))
+        frappe.msgprint(r.message);
 	})
 }
-
 
 reco_tool.validate_file_format = function (frm, attached_file) {
     frappe.call({
@@ -160,10 +158,23 @@ reco_tool.validate_file_format = function (frm, attached_file) {
             if (!r.message) {
                 return;
             }
-            // d.refresh();
         }
-    })
-        
+    })    
+}
+
+reco_tool.get_uploaded_gstr_ret_period = function (frm, cur_dialog, attached_file) {
+    frappe.call({
+        method: "adaequare_gsp.api.gstr_2b.get_uploaded_gstr_ret_period", 
+        args: {
+		attach_file: cur_dialog.fields_dict.attach_file.value
+        },
+        callback: function(r) {
+            if (!r.message) {
+                return;
+            }
+            cur_dialog.set_value("period", r.message);
+        }
+    })    
 }
 
 reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type) {
@@ -217,6 +228,11 @@ reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type
                 default: gst_return,
             },
             {
+                label: "Period",
+                fieldname: "period",
+                fieldtype: "Data"
+            },
+            {
                 fieldtype: "Column Break",
             },
             {
@@ -233,7 +249,7 @@ reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type
                     };
                 },
                 onchange() {
-                    reco_tool.fetch_download_history(frm, cur_dialog, "upload");
+                    reco_tool.fetch_download_history(frm, cur_dialog, "download");
                 },
             },
             {
@@ -243,6 +259,7 @@ reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type
                 onchange() {
                     let attached_file = cur_dialog.fields_dict.attach_file.value;
                     reco_tool.validate_file_format(frm, attached_file);
+                    reco_tool.get_uploaded_gstr_ret_period(frm, cur_dialog);
                 }
             },
             {
