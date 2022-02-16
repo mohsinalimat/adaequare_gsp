@@ -52,195 +52,159 @@ frappe.ui.form.on("Purchase Reconciliation Tool", {
         frm.trigger("render_data_table");
     },
     render_data_table(frm) {
-        const tabs = [
-            {
+        const tabs = {
+            summary: {
                 label: "Summary",
-                name: "summary",
+                default: 1,
+                datatable_options: {
+                    method: "get_summary_data",
+                    args: {
+                        company_gstin: frm.doc.company_gstin,
+                        purchase_from_date: frm.doc.purchase_from_date,
+                        purchase_to_date: frm.doc.purchase_to_date,
+                        inward_from_date: frm.doc.inward_supply_from_date,
+                        inward_to_date: frm.doc.inward_supply_to_date,
+                    },
+                    columns: [
+                        {
+                            name: "Match Type",
+                        },
+                        {
+                            name: "No. of Doc Inward Supply",
+                            width: 200,
+                        },
+                        {
+                            name: "No. of Doc Purchase",
+                            width: 150,
+                        },
+                        {
+                            name: "Tax Diff",
+                        },
+                    ],
+                    format_row(row) {
+                        return [
+                            row["match_status"],
+                            row["no_of_inward_supp"],
+                            row["no_of_doc_purchase"],
+                            row["tax_diff"],
+                        ];
+                    },
+                },
             },
-            {
+
+            supplier_level: {
                 label: "Supplier Level",
-                name: "supplier_level",
+                datatable_options: {
+                    method: "get_b2b_purchase",
+                    args: {
+                        company_gstin: frm.doc.company_gstin,
+                        purchase_from_date: frm.doc.purchase_from_date,
+                        purchase_to_date: frm.doc.purchase_to_date,
+                    },
+                    columns: [
+                        {
+                            name: "GSTIN",
+                        },
+                        {
+                            name: "Supplier Name",
+                            width: 200,
+                        },
+                        {
+                            name: "No. of Doc Inward Supply",
+                            width: 200,
+                        },
+                        {
+                            name: "No. of Doc Purchase",
+                            width: 200,
+                        },
+                        {
+                            name: "Tax Diff",
+                        },
+                    ],
+                    format_row(row) {
+                        return [
+                            row[0]["supplier_gstin"],
+                            row[0]["supplier_name"],
+                            row[0]["no_of_inward_supp"],
+                            row.length,
+                            row[0]["tax_diff"],
+                        ];
+                    },
+                },
             },
-            {
+
+            invoice_level: {
                 label: "Invoice Level",
-                name: "invoice_level",
+                datatable_options: {
+                    method: "get_b2b_purchase",
+                    args: {
+                        company_gstin: frm.doc.company_gstin,
+                        purchase_from_date: frm.doc.purchase_from_date,
+                        purchase_to_date: frm.doc.purchase_to_date,
+                    },
+                    columns: [
+                        {
+                            name: "GSTIN",
+                            width: 150,
+                        },
+                        {
+                            name: "Supplier Name",
+                            width: 200,
+                        },
+                        {
+                            name: "Inv No.",
+                            width: 120,
+                        },
+                        {
+                            name: "Date",
+                            width: 150,
+                        },
+                        {
+                            name: "Action Status",
+                        },
+                        {
+                            name: "Match Status",
+                        },
+                        {
+                            name: "Purchase Ref",
+                        },
+                        {
+                            name: "Inward Supp Ref",
+                        },
+                        {
+                            name: "Tax Diff",
+                        },
+                        {
+                            name: "Mismatch",
+                        },
+                        {
+                            name: "GSActionTIN",
+                        },
+                    ],
+                    format_row(row) {
+                        return [
+                            row[0]["supplier_gstin"],
+                            row[0]["supplier_name"],
+                            row[0]["bill_no"],
+                            row[0]["bill_date"],
+                            "",
+                            "",
+                            row[0]["name"],
+                            "",
+                            "",
+                            "",
+                            "",
+                        ];
+                    },
+                },
             },
-        ];
+        };
 
-        const $data_table_wrapper = frm.get_field("data_table").$wrapper;
-        $data_table_wrapper.html(
-            `${frappe.render_template("data_table_tab_view", {
-                tabs,
-            })}`
-        );
-
-        const $tabs = $data_table_wrapper.find(".form-tabs .tab-item");
-        $tabs.click(function () {
-            const $this = $(this);
-            $tabs.removeClass("active");
-            $this.addClass("active");
-            frm.trigger(`render_${$this.attr("data-name")}_data`);
+        new adaequare_gsp.TabView({
+            frm,
+            tabs,
+            $wrapper: frm.get_field("data_table").$wrapper,
         });
-
-        $tabs[0].click();
-        frm.$data_table = $data_table_wrapper.find(".tab-content");
-    },
-    render_summary_data(frm) {
-        frm.purchase_reconciliation_data_table_manager =
-            new adaequare_gsp.DataTableManager({
-                frm: frm,
-                $reconciliation_tool_dt: frm.$data_table,
-                $no_data: $(
-                    '<div class="text-muted text-center">No Matching Data Found</div>'
-                ),
-                method: "get_summary_data",
-                args: {
-                    company_gstin: frm.doc.company_gstin,
-                    purchase_from_date: frm.doc.purchase_from_date,
-                    purchase_to_date: frm.doc.purchase_to_date,
-                    inward_from_date: frm.doc.inward_supply_from_date,
-                    inward_to_date: frm.doc.inward_supply_to_date,
-                },
-                columns: [
-                    {
-                        name: "Match Type",
-                    },
-                    {
-                        name: "No. of Doc Inward Supply",
-                        width: 200,
-                    },
-                    {
-                        name: "No. of Doc Purchase",
-                        width: 150,
-                    },
-                    {
-                        name: "Tax Diff",
-                    },
-                ],
-                format_row(row) {
-                    return [
-                        row["match_status"],
-                        row["no_of_inward_supp"],
-                        row["no_of_doc_purchase"],
-                        row["tax_diff"],
-                    ];
-                },
-            });
-    },
-    render_supplier_level_data(frm) {
-        frm.purchase_reconciliation_data_table_manager =
-            new adaequare_gsp.DataTableManager({
-                frm: frm,
-                $reconciliation_tool_dt: frm.$data_table,
-                $no_data: $(
-                    '<div class="text-muted text-center">No Matching Data Found</div>'
-                ),
-                method: "get_b2b_purchase",
-                args: {
-                    company_gstin: frm.doc.company_gstin,
-                    purchase_from_date: frm.doc.purchase_from_date,
-                    purchase_to_date: frm.doc.purchase_to_date,
-                },
-                columns: [
-                    {
-                        name: "GSTIN",
-                    },
-                    {
-                        name: "Supplier Name",
-                        width: 200,
-                    },
-                    {
-                        name: "No. of Doc Inward Supply",
-                        width: 200,
-                    },
-                    {
-                        name: "No. of Doc Purchase",
-                        width: 200,
-                    },
-                    {
-                        name: "Tax Diff",
-                    },
-                ],
-                format_row(row) {
-                    return [
-                        row[0]["supplier_gstin"],
-                        row[0]["supplier_name"],
-                        row[0]["no_of_inward_supp"],
-                        row.length,
-                        row[0]["tax_diff"],
-                    ];
-                },
-            });
-    },
-    render_invoice_level_data(frm) {
-        frm.purchase_reconciliation_data_table_manager =
-            new adaequare_gsp.DataTableManager({
-                frm: frm,
-                $reconciliation_tool_dt: frm.$data_table,
-                $no_data: $(
-                    '<div class="text-muted text-center">No Matching Data Found</div>'
-                ),
-                method: "get_b2b_purchase",
-                args: {
-                    company_gstin: frm.doc.company_gstin,
-                    purchase_from_date: frm.doc.purchase_from_date,
-                    purchase_to_date: frm.doc.purchase_to_date,
-                },
-                columns: [
-                    {
-                        name: "GSTIN",
-                        width: 150,
-                    },
-                    {
-                        name: "Supplier Name",
-                        width: 200,
-                    },
-                    {
-                        name: "Inv No.",
-                        width: 120,
-                    },
-                    {
-                        name: "Date",
-                        width: 150,
-                    },
-                    {
-                        name: "Action Status",
-                    },
-                    {
-                        name: "Match Status",
-                    },
-                    {
-                        name: "Purchase Ref",
-                    },
-                    {
-                        name: "Inward Supp Ref",
-                    },
-                    {
-                        name: "Tax Diff",
-                    },
-                    {
-                        name: "Mismatch",
-                    },
-                    {
-                        name: "GSActionTIN",
-                    },
-                ],
-                format_row(row) {
-                    return [
-                        row[0]["supplier_gstin"],
-                        row[0]["supplier_name"],
-                        row[0]["bill_no"],
-                        row[0]["bill_date"],
-                        "",
-                        "",
-                        row[0]["name"],
-                        "",
-                        "",
-                        "",
-                        "",
-                    ];
-                },
-            });
     },
 });
 
