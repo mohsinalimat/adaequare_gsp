@@ -56,7 +56,9 @@ class GstnReturnsApi(AuthApi):
         )
         return frappe._dict(response)
 
-    def create_or_update_download_log(self, gst_return, classification, return_period):
+    def create_or_update_download_log(
+        self, gst_return, classification, return_period, no_data_found=0
+    ):
         doctype = "GSTR Download Log"
         name = frappe.db.get_value(
             doctype,
@@ -65,6 +67,7 @@ class GstnReturnsApi(AuthApi):
                 "gst_return": gst_return,
                 "classification": classification,
                 "return_period": return_period,
+                "no_data_found": no_data_found,
             },
             fieldname="name",
         )

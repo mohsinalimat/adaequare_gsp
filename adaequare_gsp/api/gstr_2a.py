@@ -24,7 +24,7 @@ def get_gstr_2a(gstin, ret_periods, otp=None):
                 return response
             elif api.no_docs_found(response):
                 api.create_or_update_download_log(
-                    gst_return, classification, ret_period
+                    gst_return, classification, ret_period, no_data_found=1
                 )
             else:
                 validate_response(response, act)

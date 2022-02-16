@@ -15,8 +15,8 @@ YES_NO = {"Y": 1, "N": 0}
 
 DATA_2B = {
     "company_gstin": "gstin",
-    "2b_return_period": "rtnprd",
-    "2b_gen_date": "gendt",
+    "return_period_2b": "rtnprd",
+    "gen_date_2b": "gendt",
 }
 
 MODIFY_DATA_2B = {

@@ -9,6 +9,7 @@
   "gstin",
   "gst_return",
   "classification",
+  "no_data_found",
   "return_period",
   "last_updated_on"
  ],
@@ -38,11 +39,17 @@
    "fieldname": "gstin",
    "fieldtype": "Data",
    "label": "GSTIN"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_data_found",
+   "fieldtype": "Check",
+   "label": "No Data Found"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-03 10:25:45.692888",
+ "modified": "2022-02-16 10:29:31.158796",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "GSTR Download Log",

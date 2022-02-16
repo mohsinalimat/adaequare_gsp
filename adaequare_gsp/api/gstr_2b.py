@@ -23,11 +23,13 @@ def get_gstr_2b(gstin, ret_periods, otp=None):
         if api.otp_required(response):
             return response
         elif api.no_docs_found(response):
-            api.create_or_update_download_log(gst_return, "", ret_period)
+            api.create_or_update_download_log(
+                gst_return, "", ret_period, no_data_found=1
+            )
         else:
             validate_response(response, gstin, ret_period)
             api.create_or_update_download_log(gst_return, "", ret_period)
-            create_or_update_transaction(response, [gstin, api.company], now=False)
+            create_or_update_transaction(response, [gstin, api.company], ret_period)
     return "Success"
 
 
@@ -42,7 +44,7 @@ def validate_response(response, gstin, ret_period):
         )
 
 
-def create_or_update_transaction(response, company_info, now):
+def create_or_update_transaction(response, company_info, ret_period, now=False):
     modify_dict(response.get("data"), MODIFY_DATA_2B)
     for subtyp in CLASS_MAP:
         frappe.enqueue(
@@ -52,6 +54,12 @@ def create_or_update_transaction(response, company_info, now):
             response=response,
             company_info=company_info,
             classification=subtyp,
+        )
+        frappe.enqueue(
+            update_download_history,
+            now=now,
+            enqueue_after_commit=True,
+            ret_period=ret_period,
         )
 
 
@@ -89,7 +97,6 @@ def create_or_update_b2b(response, company_info, classification):
                 inv_dict,
             )
             doc.save(ignore_permissions=True)
-        # TODO update data availability for 2A from 2B
 
 
 def update_doc(
@@ -171,3 +178,32 @@ def transaction_exists(sup_dict, sup_detail, b2b_dict, inv_dict, classification)
         fieldname="name",
     )
     return name
+
+
+def update_download_history(ret_period):
+    # update 2A data availability from 2B download
+    dt = frappe.qb.DocType("Inward Supply")
+    docs = (
+        frappe.qb.from_(dt)
+        .select("sup_return_period", "classification")
+        .where(dt.return_period_2b == ret_period)
+        .groupby("sup_return_period", "classification")
+        .run(as_dict=True)
+    )
+    if not docs:
+        return
+
+    dt_log = frappe.qb.DocType("GSTR Download Log")
+    for doc in docs:
+        logs = (
+            frappe.qb.from_(dt_log)
+            .select("name")
+            .where(dt_log.return_period == doc.get("sup_return_period"))
+            .where(dt_log.classification == doc.get("classification"))
+            .where(dt_log.no_data_found == 1)
+            .run(as_list=True)
+        )
+        for log in logs:
+            doc = frappe.get_doc("GSTR Download Log", log[0])
+            doc.no_data_found = 0
+            doc.save(ignore_permissions=True)

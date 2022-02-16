@@ -37,10 +37,10 @@
   "irn_gen_date",
   "section_break_25",
   "itc_availability",
-  "2b_return_period",
+  "return_period_2b",
   "column_break_28",
   "reason_itc_unavailability",
-  "2b_gen_date",
+  "gen_date_2b",
   "section_break_32",
   "other_return_period",
   "original_doc_number",
@@ -297,16 +297,6 @@
    "options": "\nCredit Note\nDebit Note\nISD Invoice\nISD Credit Note"
   },
   {
-   "fieldname": "2b_return_period",
-   "fieldtype": "Data",
-   "label": "2B Return Period"
-  },
-  {
-   "fieldname": "2b_gen_date",
-   "fieldtype": "Date",
-   "label": "2B Generation Date"
-  },
-  {
    "fieldname": "sup_return_period",
    "fieldtype": "Data",
    "label": "Return Period"
@@ -347,11 +337,21 @@
    "fieldtype": "Select",
    "label": "Match Status",
    "options": "\nExact Match\nPartial Match\nMismatch"
+  },
+  {
+   "fieldname": "return_period_2b",
+   "fieldtype": "Data",
+   "label": "2B Return Period"
+  },
+  {
+   "fieldname": "gen_date_2b",
+   "fieldtype": "Date",
+   "label": "2B Generation Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-03 19:22:43.939081",
+ "modified": "2022-02-16 11:39:14.855432",
  "modified_by": "Administrator",
  "module": "Adaequare Gsp",
  "name": "Inward Supply",

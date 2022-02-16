@@ -17,10 +17,11 @@ class TestInwardSupply(unittest.TestCase):
     gstin = "01AABCE2207R1Z5"
     company = "_Test Company"
     doctype = "Inward Supply"
+    ret_period = "032020"
 
     def test_aaa(self):
         create_or_update_transaction_2b(
-            frappe._dict(GSTR_2B), [self.gstin, self.company], now=True
+            frappe._dict(GSTR_2B), [self.gstin, self.company], self.ret_period, now=True
         )
         create_or_update_transaction_2a(
             frappe._dict(GSTR_2A_B2B), "B2B", [self.gstin, self.company], now=True
@@ -56,8 +57,8 @@ class TestInwardSupply(unittest.TestCase):
         doc = frappe.get_doc(self.doctype, name)
         out = {
             "company_gstin": "01AABCE2207R1Z5",
-            "2b_return_period": "032020",
-            "2b_gen_date": datetime.strptime("14-04-2020", DATE_FORMAT).date(),
+            "return_period_2b": "032020",
+            "gen_date_2b": datetime.strptime("14-04-2020", DATE_FORMAT).date(),
             "supplier_gstin": "01AABCE2207R1Z5",
             "supplier_name": "GSTN",
             "gstr_1_filing_date": datetime.strptime("18-11-2019", DATE_FORMAT).date(),
@@ -206,8 +207,8 @@ class TestInwardSupply(unittest.TestCase):
         doc = frappe.get_doc(self.doctype, name)
         out = {
             "company_gstin": "01AABCE2207R1Z5",
-            "2b_return_period": "032020",
-            "2b_gen_date": datetime.strptime("14-04-2020", DATE_FORMAT).date(),
+            "return_period_2b": "032020",
+            "gen_date_2b": datetime.strptime("14-04-2020", DATE_FORMAT).date(),
             "supplier_gstin": "01AAAAP1208Q1ZS",
             "supplier_name": "GSTN",
             "gstr_1_filing_date": datetime.strptime("18-11-2019", DATE_FORMAT).date(),
