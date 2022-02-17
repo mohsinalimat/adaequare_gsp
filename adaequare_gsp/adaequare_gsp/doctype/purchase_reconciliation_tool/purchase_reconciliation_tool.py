@@ -317,11 +317,14 @@ class PurchaseReconciliationTool(Document):
                     ),
                     None,
                 )
+                status = "🟠 Not Downloaded"
+                if download:
+                    status = "🔵 No Data Found" if download.no_data_found else "🟢 Downloaded"
+
                 _dict = {
                     "Classification": _class if gstr_name == "GSTR 2A" else "ALL",
-                    "Status": "Downloaded" if download else "Not Downloaded",
-                    "Downloaded On": "✅ "
-                    + download.last_updated_on.strftime("%d-%m-%Y %H:%M:%S")
+                    "Status": status,
+                    "Downloaded On": download.last_updated_on.strftime("%d-%m-%Y %H:%M:%S")
                     if download
                     else "",
                 }
@@ -349,6 +352,6 @@ class PurchaseReconciliationTool(Document):
                 "gstin": self.company_gstin,
                 "gst_return": gstr_name,
             },
-            fields=["return_period", "classification", "last_updated_on"],
+            fields=["return_period", "classification", "no_data_found", "last_updated_on"],
         )
         return periods, download_history

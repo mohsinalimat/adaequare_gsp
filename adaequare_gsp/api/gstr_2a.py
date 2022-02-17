@@ -18,8 +18,17 @@ def get_gstr_2a(gstin, ret_periods, otp=None):
     for ret_period in ret_periods:
         api = Gstr2aApi(gstin)
         for act in ACTIONS:
-            response = api.get_gstr_2a(act, ret_period, otp)
+            # call api only if data is available
             classification = CLASS_MAP[act][2]
+            no_data_found = frappe.db.get_value(
+                "GSTR Download Log",
+                {"gst_return": gst_return, "return_period": ret_period, "classification": classification},
+                "no_data_found"
+            )
+            if no_data_found:
+                continue
+
+            response = api.get_gstr_2a(act, ret_period, otp)
             if api.otp_required(response):
                 return response
             elif api.no_docs_found(response):

@@ -67,12 +67,11 @@ class GstnReturnsApi(AuthApi):
                 "gst_return": gst_return,
                 "classification": classification,
                 "return_period": return_period,
-                "no_data_found": no_data_found,
             },
             fieldname="name",
         )
         if name:
-            frappe.db.set_value(doctype, name, "last_updated_on", now())
+            frappe.db.set_value(doctype, name, {"last_updated_on": now(), "no_data_found": no_data_found,})
         else:
             doc = frappe.get_doc(
                 {
@@ -81,6 +80,7 @@ class GstnReturnsApi(AuthApi):
                     "gst_return": gst_return,
                     "classification": classification,
                     "return_period": return_period,
+                    "no_data_found": no_data_found,
                 }
             )
             doc.last_updated_on = now()
