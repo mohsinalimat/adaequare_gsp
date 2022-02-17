@@ -35,28 +35,22 @@ def get_gstr_2b(gstin, ret_periods, otp=None):
     return "Success"
 
 @frappe.whitelist()
-def upload_gstr_2b(gstin, period, attach_file):
+def upload_gstr_2b(gstin, gst_return, period, attach_file):
     gstr_2b_json = get_json_from_url(attach_file)
     
     api = Gstr2bApi(gstin)
     validate_response(gstr_2b_json, gstin, period)
-    api.create_or_update_download_log("GSTR 2B", "", period)
+    api.create_or_update_download_log(gst_return, "", period)
     create_or_update_transaction(gstr_2b_json, [gstin, api.company], period, now=False)
     return "Success"
 
-@frappe.whitelist()
-def get_uploaded_gstr_ret_period(attach_file):
-    if attach_file:
-        gstr_2b_json = get_json_from_url(attach_file) 
-        ret_period = gstr_2b_json.get('data').get('rtnprd')
-        return ret_period
 
 def get_json_from_url(attach_file):
     json_url = frappe.utils.get_url(attach_file)
     file = urllib.request.urlopen(json_url)
     read_file = file.read()
-    gstr_2b_json = json.loads(read_file)
-    return gstr_2b_json
+    gstr_file_json = json.loads(read_file)
+    return gstr_file_json
 
 @frappe.whitelist()
 def validate_file_format(attach_file):

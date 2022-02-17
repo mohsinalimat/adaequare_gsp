@@ -141,6 +141,7 @@ reco_tool.download_gstr = function (frm, d, method, otp=null) {
 
 reco_tool.upload_gstr = function (frm, d, method) {
 	frm.call(method, {
+        gst_return: d.fields_dict.gst_return.value,
         period: d.fields_dict.period.value,
 		attach_file: d.fields_dict.attach_file.value
 	}).then(r => {
@@ -162,19 +163,20 @@ reco_tool.validate_file_format = function (frm, attached_file) {
     })    
 }
 
-reco_tool.get_uploaded_gstr_ret_period = function (frm, cur_dialog, attached_file) {
-    frappe.call({
-        method: "adaequare_gsp.api.gstr_2b.get_uploaded_gstr_ret_period", 
-        args: {
-		attach_file: cur_dialog.fields_dict.attach_file.value
-        },
-        callback: function(r) {
-            if (!r.message) {
-                return;
-            }
-            cur_dialog.set_value("period", r.message);
+reco_tool.get_uploaded_gstr_ret_period = function (frm, cur_dialog) {
+    frm.call("get_uploaded_gstr_ret_period", 
+    {
+    gst_return: cur_dialog.fields_dict.gst_return.value,
+    attach_file: cur_dialog.fields_dict.attach_file.value
+    }).then(r => {
+        console.log(r.message);
+        if (!r.message) {
+            frappe.msgprint("Return Period not found");
+            cur_dialog.hide();
+            return;
         }
-    })    
+        cur_dialog.set_value("period", r.message);
+    })
 }
 
 reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type) {
@@ -230,7 +232,8 @@ reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type
             {
                 label: "Period",
                 fieldname: "period",
-                fieldtype: "Data"
+                fieldtype: "Data",
+                read_only: 1,
             },
             {
                 fieldtype: "Column Break",
@@ -258,8 +261,10 @@ reco_tool.get_upload_or_download_dialog_fields = function (frm, gst_return, type
                 fieldtype: "Attach",
                 onchange() {
                     let attached_file = cur_dialog.fields_dict.attach_file.value;
-                    reco_tool.validate_file_format(frm, attached_file);
-                    reco_tool.get_uploaded_gstr_ret_period(frm, cur_dialog);
+                    if (attached_file) {
+                        reco_tool.validate_file_format(frm, attached_file);
+                        reco_tool.get_uploaded_gstr_ret_period(frm, cur_dialog);
+                    }
                 }
             },
             {

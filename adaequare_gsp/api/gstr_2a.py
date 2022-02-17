@@ -1,6 +1,6 @@
 import json
 import frappe
-from adaequare_gsp.api.gstr_2b import transaction_exists, modify_dict, update_doc
+from adaequare_gsp.api.gstr_2b import transaction_exists, modify_dict, update_doc, get_json_from_url
 from adaequare_gsp.helpers.gstn_returns_api import Gstr2aApi
 from adaequare_gsp.helpers.schema.gstr_2a import (
     ACTIONS,
@@ -36,6 +36,17 @@ def get_gstr_2a(gstin, ret_periods, otp=None):
                 )
     return "Success"
 
+@frappe.whitelist()
+def upload_gstr_2a(gstin, gst_return, period, attach_file):
+    gstr_2a_json = get_json_from_url(attach_file)
+    api = Gstr2aApi(gstin)
+
+    for act in ACTIONS:
+        classification = CLASS_MAP[act][2]
+        # validate_response(gstr_2a_json, act)
+        api.create_or_update_download_log(gst_return, classification, period)
+        create_or_update_transaction(gstr_2a_json, act, [gstin, api.company], now=True)
+    return "Success"
 
 def validate_response(response, action):
     if not response.get(action.lower()):

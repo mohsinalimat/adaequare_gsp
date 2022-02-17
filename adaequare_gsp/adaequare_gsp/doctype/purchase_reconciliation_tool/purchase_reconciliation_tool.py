@@ -3,13 +3,12 @@
 
 import frappe
 import pandas as pd
-import re
 
 from datetime import datetime
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from adaequare_gsp.helpers.schema.gstr_2a import CLASSIFICATION
-from adaequare_gsp.api.gstr_2a import get_gstr_2a
+from adaequare_gsp.api.gstr_2a import get_gstr_2a, upload_gstr_2a
 from adaequare_gsp.api.gstr_2b import get_gstr_2b, upload_gstr_2b, get_json_from_url
 from fuzzywuzzy import process, fuzz
 
@@ -267,9 +266,11 @@ class PurchaseReconciliationTool(Document):
         return inv
 
     @frappe.whitelist()
-    def upload_gstr(self, period, attach_file):
-        # periods, download_history = self.get_downloads_history(gstr_name, fiscal_year)
-        response = upload_gstr_2b(self.company_gstin, period, attach_file)
+    def upload_gstr(self, gst_return, period, attach_file):
+        if gst_return == "GSTR 2A":
+            response = upload_gstr_2a(self.company_gstin, gst_return, period, attach_file)
+        if gst_return == "GSTR 2B":
+            response = upload_gstr_2b(self.company_gstin, gst_return, period, attach_file)
         return response
 
     @frappe.whitelist()
@@ -370,6 +371,19 @@ class PurchaseReconciliationTool(Document):
             json_response = get_json_from_url(attach_file)
             ret_period = json_response.get('data').get('rtnprd')
             return ret_period
+
+    @frappe.whitelist()
+    def get_uploaded_gstr_ret_period(self, gst_return, attach_file):
+        if attach_file:
+            gstr_file_json = get_json_from_url(attach_file)
+            try:
+                if gst_return == "GSTR 2A":
+                    ret_period = gstr_file_json.get('fp')
+                if gst_return == "GSTR 2B":
+                    ret_period = gstr_file_json.get('data').get('rtnprd')
+                return ret_period
+            except:
+                return
 
 @frappe.whitelist()
 def get_summary_data(company_gstin, purchase_from_date, purchase_to_date, inward_from_date, inward_to_date):
